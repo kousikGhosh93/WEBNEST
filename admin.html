@@ -1518,7 +1518,45 @@
 
         });
 
+document
+  .querySelectorAll("[data-share]")
+  .forEach((button) => {
 
+    button.addEventListener(
+      "click",
+      async () => {
+
+        const quizId =
+          button.dataset.share;
+
+        const quizUrl =
+          `${window.location.origin}/quiz.html?id=${quizId}`;
+
+        try {
+
+          await navigator.clipboard.writeText(
+            quizUrl
+          );
+
+          showMessage(
+            "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+          prompt(
+            "Copy this quiz link:",
+            quizUrl
+          );
+
+        }
+
+      }
+    );
+
+  });
       document
         .querySelectorAll("[data-publish]")
         .forEach((button) => {
