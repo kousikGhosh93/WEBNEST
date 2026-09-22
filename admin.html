@@ -1771,7 +1771,9 @@ async function loadQuizzes(){
               button.dataset.share;
 
             const quizUrl =
-              `${window.location.origin}/quiz.html?id=${quizId}`;
+  `${window.location.origin}${window.location.pathname
+    .substring(0, window.location.pathname.lastIndexOf("/") + 1)
+  }quiz.html?id=${quizId}`;
 
             try{
 
