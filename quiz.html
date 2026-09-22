@@ -23,7 +23,19 @@
     header {
       background: white;
       border-bottom: 1px solid #e2e8f0;
-      padding: 18px 7%;
+      padding: 16px 7%;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-inner {
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
     }
 
     .logo {
@@ -32,9 +44,23 @@
       color: #2563eb;
     }
 
+    .timer {
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .timer.warning {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
     main {
       width: min(850px, 92%);
-      margin: 35px auto;
+      margin: 30px auto;
     }
 
     .card {
@@ -42,7 +68,7 @@
       border: 1px solid #e2e8f0;
       border-radius: 18px;
       padding: 25px;
-      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
     }
 
     .quiz-title {
@@ -52,16 +78,44 @@
 
     .quiz-info {
       color: #64748b;
+      margin-bottom: 22px;
+    }
+
+    .progress-area {
       margin-bottom: 25px;
     }
 
-    label {
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 9px;
+      background: #e2e8f0;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      border-radius: 20px;
+      transition: width 0.25s;
+    }
+
+    label.name-label {
       display: block;
       font-weight: 700;
       margin-bottom: 8px;
     }
 
-    input {
+    input.name-input {
       width: 100%;
       padding: 13px;
       border: 1px solid #cbd5e1;
@@ -71,7 +125,7 @@
       outline: none;
     }
 
-    input:focus {
+    input.name-input:focus {
       border-color: #2563eb;
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
@@ -84,14 +138,24 @@
       background: #f8fafc;
     }
 
+    .question-number {
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
     .question-text {
       font-size: 18px;
       font-weight: 700;
       margin-bottom: 16px;
+      line-height: 1.5;
     }
 
     .option {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 13px 15px;
       margin-bottom: 9px;
       border: 1px solid #cbd5e1;
@@ -106,14 +170,26 @@
       background: #eff6ff;
     }
 
+    .option.selected {
+      border-color: #2563eb;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
     .option input {
       width: auto;
-      margin: 0 8px 0 0;
+      margin: 0;
+      accent-color: #2563eb;
+    }
+
+    .option-letter {
+      font-weight: 800;
+      min-width: 25px;
     }
 
     .submit-button {
       width: 100%;
-      background: #2563eb;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
       color: white;
       border: none;
       border-radius: 10px;
@@ -125,7 +201,12 @@
     }
 
     .submit-button:hover {
-      background: #1d4ed8;
+      opacity: 0.92;
+    }
+
+    .submit-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .message {
@@ -140,28 +221,77 @@
       color: #b91c1c;
     }
 
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+    }
+
     .result {
       display: none;
       text-align: center;
       padding: 35px 20px;
     }
 
+    .result-icon {
+      font-size: 55px;
+      margin-bottom: 10px;
+    }
+
     .result-score {
-      font-size: 52px;
+      font-size: 56px;
       font-weight: 800;
       color: #2563eb;
-      margin: 15px 0;
+      margin: 15px 0 5px;
+    }
+
+    .result-percentage {
+      font-size: 22px;
+      font-weight: 700;
+      color: #15803d;
+      margin-bottom: 20px;
     }
 
     .result-text {
       color: #64748b;
-      font-size: 17px;
+      font-size: 16px;
+      margin-top: 8px;
     }
 
-    .loading {
-      text-align: center;
-      padding: 40px;
+    .result-details {
+      margin-top: 25px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .result-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .result-box strong {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .result-box span {
       color: #64748b;
+      font-size: 13px;
+    }
+
+    .restart-button {
+      margin-top: 25px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 9px;
+      background: #e2e8f0;
+      color: #334155;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     @media (max-width: 600px) {
@@ -176,6 +306,23 @@
       .card {
         padding: 18px;
       }
+
+      .result-details {
+        grid-template-columns: 1fr;
+      }
+
+      .header-inner {
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .timer {
+        font-size: 13px;
+        padding: 8px 10px;
+      }
     }
   </style>
 </head>
@@ -183,8 +330,9 @@
 <body>
 
 <header>
-  <div class="logo">
-    WebNest
+  <div class="header-inner">
+    <div class="logo">WebNest</div>
+    <div class="timer" id="timer">⏱️ 30:00</div>
   </div>
 </header>
 
@@ -202,13 +350,27 @@
 
     <p class="quiz-info" id="quizInfo"></p>
 
+    <div class="progress-area">
+
+      <div class="progress-top">
+        <span id="progressText">0 / 0 answered</span>
+        <span id="progressPercent">0%</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+    </div>
+
     <div id="errorMessage" class="message error"></div>
 
-    <label for="studentName">
+    <label class="name-label" for="studentName">
       Your Name
     </label>
 
     <input
+      class="name-input"
       id="studentName"
       type="text"
       placeholder="Enter your name"
@@ -227,32 +389,54 @@
 
   <div id="resultCard" class="card result">
 
-    <h2>🎉 Quiz Completed!</h2>
+    <div class="result-icon">🎉</div>
+
+    <h2>Quiz Completed!</h2>
 
     <div class="result-score" id="resultScore">
       0/0
     </div>
 
-    <p class="result-text" id="resultPercentage">
+    <div class="result-percentage" id="resultPercentage">
       0%
-    </p>
+    </div>
 
-    <p
-      class="result-text"
-      id="resultStudent"
-      style="margin-top:10px;"
-    ></p>
+    <p class="result-text" id="resultStudent"></p>
+
+    <div class="result-details">
+
+      <div class="result-box">
+        <strong id="correctCount">0</strong>
+        <span>Correct</span>
+      </div>
+
+      <div class="result-box">
+        <strong id="wrongCount">0</strong>
+        <span>Wrong</span>
+      </div>
+
+      <div class="result-box">
+        <strong id="totalCount">0</strong>
+        <span>Total</span>
+      </div>
+
+    </div>
+
+    <button
+      class="restart-button"
+      onclick="window.location.reload()"
+    >
+      Try Again
+    </button>
 
   </div>
 
 </main>
 
-
 <script type="module">
 
   import {
     collection,
-    getDocs,
     doc,
     getDoc,
     setDoc
@@ -299,9 +483,36 @@
   const resultStudent =
     document.getElementById("resultStudent");
 
+  const correctCount =
+    document.getElementById("correctCount");
+
+  const wrongCount =
+    document.getElementById("wrongCount");
+
+  const totalCount =
+    document.getElementById("totalCount");
+
+  const timerElement =
+    document.getElementById("timer");
+
+  const progressText =
+    document.getElementById("progressText");
+
+  const progressPercent =
+    document.getElementById("progressPercent");
+
+  const progressFill =
+    document.getElementById("progressFill");
+
 
   let currentQuiz = null;
   let currentQuizId = null;
+
+  let timerSeconds = 30 * 60;
+
+  let timerInterval = null;
+
+  let quizSubmitted = false;
 
 
   function showError(text) {
@@ -309,6 +520,11 @@
     errorMessage.textContent = text;
 
     errorMessage.style.display = "block";
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
 
   }
 
@@ -337,11 +553,201 @@
   }
 
 
+  function updateTimer() {
+
+    const minutes =
+      Math.floor(timerSeconds / 60);
+
+    const seconds =
+      timerSeconds % 60;
+
+    timerElement.textContent =
+      `⏱️ ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+    if (timerSeconds <= 60) {
+      timerElement.classList.add("warning");
+    }
+
+    if (timerSeconds <= 0) {
+
+      clearInterval(timerInterval);
+
+      if (!quizSubmitted) {
+        submitQuiz(true);
+      }
+
+    }
+
+    timerSeconds--;
+
+  }
+
+
+  function startTimer() {
+
+    updateTimer();
+
+    timerInterval =
+      setInterval(updateTimer, 1000);
+
+  }
+
+
+  function updateProgress() {
+
+    const questions =
+      currentQuiz?.questions || [];
+
+    const total =
+      questions.length;
+
+    let answered = 0;
+
+    for (let i = 0; i < total; i++) {
+
+      const selected =
+        document.querySelector(
+          `input[name="question-${i}"]:checked`
+        );
+
+      if (selected) {
+        answered++;
+      }
+
+    }
+
+    const percentage =
+      total === 0
+        ? 0
+        : Math.round((answered / total) * 100);
+
+    progressText.textContent =
+      `${answered} / ${total} answered`;
+
+    progressPercent.textContent =
+      `${percentage}%`;
+
+    progressFill.style.width =
+      `${percentage}%`;
+
+  }
+
+
+  function renderQuestions(questions) {
+
+    questionsContainer.innerHTML = "";
+
+    questions.forEach(
+      (question, index) => {
+
+        const box =
+          document.createElement("div");
+
+        box.className =
+          "question";
+
+        let optionsHtml = "";
+
+        question.options.forEach(
+          (option, optionIndex) => {
+
+            const letter =
+              String.fromCharCode(
+                65 + optionIndex
+              );
+
+            optionsHtml += `
+
+              <label
+                class="option"
+                data-option="${index}-${optionIndex}"
+              >
+
+                <input
+                  type="radio"
+                  name="question-${index}"
+                  value="${optionIndex}"
+                >
+
+                <span class="option-letter">
+                  ${letter}.
+                </span>
+
+                <span>
+                  ${escapeHtml(option)}
+                </span>
+
+              </label>
+
+            `;
+
+          }
+        );
+
+        box.innerHTML = `
+
+          <div class="question-number">
+            QUESTION ${index + 1}
+          </div>
+
+          <div class="question-text">
+            ${escapeHtml(question.question)}
+          </div>
+
+          ${optionsHtml}
+
+        `;
+
+        questionsContainer.appendChild(box);
+
+      }
+    );
+
+
+    document
+      .querySelectorAll(".option")
+      .forEach((option) => {
+
+        option.addEventListener(
+          "click",
+          () => {
+
+            const input =
+              option.querySelector("input");
+
+            const questionName =
+              input.name;
+
+            document
+              .querySelectorAll(
+                `input[name="${questionName}"]`
+              )
+              .forEach((radio) => {
+
+                radio
+                  .closest(".option")
+                  .classList.remove("selected");
+
+              });
+
+            option.classList.add("selected");
+
+            input.checked = true;
+
+            updateProgress();
+
+          }
+        );
+
+      });
+
+  }
+
+
   async function loadQuiz() {
 
     currentQuizId =
       getQuizId();
-
 
     if (!currentQuizId) {
 
@@ -352,7 +758,6 @@
 
     }
 
-
     try {
 
       const quizRef =
@@ -362,10 +767,8 @@
           currentQuizId
         );
 
-
       const snapshot =
         await getDoc(quizRef);
-
 
       if (!snapshot.exists()) {
 
@@ -376,10 +779,8 @@
 
       }
 
-
       const quiz =
         snapshot.data();
-
 
       if (!quiz.published) {
 
@@ -390,28 +791,26 @@
 
       }
 
-
       currentQuiz = quiz;
 
+      const questions =
+        quiz.questions || [];
 
       quizTitle.textContent =
         quiz.title || "Quiz";
 
-
       quizInfo.textContent =
-        `${quiz.subject || ""} • ${(quiz.questions || []).length} Questions`;
+        `${quiz.subject || ""} • ${questions.length} Questions`;
 
-
-      renderQuestions(
-        quiz.questions || []
-      );
-
+      renderQuestions(questions);
 
       loading.style.display =
         "none";
 
       quizCard.style.display =
         "block";
+
+      startTimer();
 
     } catch (error) {
 
@@ -425,92 +824,27 @@
   }
 
 
-  function renderQuestions(questions) {
+  async function submitQuiz(autoSubmit = false) {
 
-    questionsContainer.innerHTML = "";
+    if (quizSubmitted) return;
 
+    errorMessage.style.display =
+      "none";
 
-    questions.forEach(
-      (question, index) => {
+    const name =
+      studentName.value.trim();
 
-        const box =
-          document.createElement("div");
+    if (!name) {
 
-        box.className =
-          "question";
+      if (autoSubmit) {
 
+        studentName.value =
+          "Anonymous Student";
 
-        let optionsHtml = "";
-
-
-        question.options.forEach(
-          (option, optionIndex) => {
-
-            const letter =
-              String.fromCharCode(
-                65 + optionIndex
-              );
-
-
-            optionsHtml += `
-
-              <label class="option">
-
-                <input
-                  type="radio"
-                  name="question-${index}"
-                  value="${optionIndex}"
-                >
-
-                <strong>${letter}.</strong>
-                ${escapeHtml(option)}
-
-              </label>
-
-            `;
-
-          }
-        );
-
-
-        box.innerHTML = `
-
-          <div class="question-text">
-
-            ${index + 1}.
-            ${escapeHtml(question.question)}
-
-          </div>
-
-          ${optionsHtml}
-
-        `;
-
-
-        questionsContainer.appendChild(box);
-
-      }
-    );
-
-  }
-
-
-  submitButton.addEventListener(
-    "click",
-    async () => {
-
-      errorMessage.style.display =
-        "none";
-
-
-      const name =
-        studentName.value.trim();
-
-
-      if (!name) {
+      } else {
 
         showError(
-          "Please enter your name."
+          "Please enter your name before submitting."
         );
 
         studentName.focus();
@@ -519,40 +853,36 @@
 
       }
 
+    }
 
-      const questions =
-        currentQuiz.questions || [];
+    const finalName =
+      studentName.value.trim();
 
+    const questions =
+      currentQuiz.questions || [];
 
-      let score = 0;
+    let score = 0;
 
-
-      for (
-        let i = 0;
-        i < questions.length;
-        i++
-      ) {
-
-        const selected =
-          document.querySelector(
-            `input[name="question-${i}"]:checked`
-          );
+    let answered = 0;
 
 
-        if (!selected) {
+    for (
+      let i = 0;
+      i < questions.length;
+      i++
+    ) {
 
-          showError(
-            `Please answer Question ${i + 1}.`
-          );
+      const selected =
+        document.querySelector(
+          `input[name="question-${i}"]:checked`
+        );
 
-          return;
+      if (selected) {
 
-        }
-
+        answered++;
 
         const answer =
           Number(selected.value);
-
 
         if (
           answer ===
@@ -565,97 +895,139 @@
 
         }
 
-      }
+      } else if (!autoSubmit) {
 
-
-      const total =
-        questions.length;
-
-
-      const percentage =
-        Math.round(
-          (score / total) * 100
+        showError(
+          `Please answer Question ${i + 1}.`
         );
 
+        return;
 
-      submitButton.disabled =
-        true;
+      }
 
-      submitButton.textContent =
-        "Submitting...";
+    }
 
 
-      try {
+    const total =
+      questions.length;
 
-        const scoreRef =
-          doc(
-            collection(db, "scores")
+    const wrong =
+      total - score;
+
+    const percentage =
+      total === 0
+        ? 0
+        : Math.round(
+            (score / total) * 100
           );
 
 
-        await setDoc(
-          scoreRef,
-          {
+    quizSubmitted = true;
 
-            studentName:
-              name,
+    clearInterval(timerInterval);
 
-            quizId:
-              currentQuizId,
+    submitButton.disabled = true;
 
-            quizTitle:
-              currentQuiz.title || "",
+    submitButton.textContent =
+      "Submitting...";
 
-            score:
-              score,
 
-            total:
-              total,
+    try {
 
-            percentage:
-              percentage,
-
-            submittedAt:
-              new Date().toISOString()
-
-          }
+      const scoreRef =
+        doc(
+          collection(db, "scores")
         );
 
+      await setDoc(
+        scoreRef,
+        {
 
-        quizCard.style.display =
-          "none";
+          studentName:
+            finalName,
 
-        resultCard.style.display =
-          "block";
+          quizId:
+            currentQuizId,
+
+          quizTitle:
+            currentQuiz.title || "",
+
+          score:
+            score,
+
+          total:
+            total,
+
+          percentage:
+            percentage,
+
+          answered:
+            answered,
+
+          submittedAt:
+            new Date().toISOString()
+
+        }
+      );
 
 
-        resultScore.textContent =
-          `${score}/${total}`;
+      quizCard.style.display =
+        "none";
+
+      resultCard.style.display =
+        "block";
 
 
-        resultPercentage.textContent =
-          `${percentage}%`;
+      resultScore.textContent =
+        `${score}/${total}`;
+
+      resultPercentage.textContent =
+        `${percentage}%`;
+
+      resultStudent.textContent =
+        `Submitted by ${finalName}`;
+
+      correctCount.textContent =
+        score;
+
+      wrongCount.textContent =
+        wrong;
+
+      totalCount.textContent =
+        total;
 
 
-        resultStudent.textContent =
-          `Submitted by ${name}`;
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
 
-      } catch (error) {
 
-        console.error(error);
+    } catch (error) {
 
-        showError(
-          "Could not submit your result. Please try again."
-        );
+      console.error(error);
 
-        submitButton.disabled =
-          false;
+      quizSubmitted = false;
 
-        submitButton.textContent =
-          "Submit Quiz";
+      submitButton.disabled =
+        false;
 
-      }
+      submitButton.textContent =
+        "Submit Quiz";
 
+      showError(
+        "Could not submit your result. Please try again."
+      );
+
+    }
+
+  }
+
+
+  submitButton.addEventListener(
+    "click",
+    () => {
+      submitQuiz(false);
     }
   );
 
