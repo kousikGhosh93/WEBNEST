@@ -121,6 +121,7 @@
     .quiz-list {
       display: grid;
       gap: 12px;
+      margin-top: 20px;
     }
 
     .quiz-item {
@@ -379,33 +380,24 @@
 <body>
 
 <header>
-
-  <div class="logo">
-    WebNest
-  </div>
+  <div class="logo">WebNest</div>
 
   <div class="header-right">
-
     <span class="user-email" id="userEmail"></span>
 
     <button class="logout" id="logoutButton">
       Logout
     </button>
-
   </div>
-
 </header>
 
 <main>
 
   <div class="welcome">
-
     <h1>Admin Panel</h1>
-
     <p>
       Manage WebNest quizzes, users and student scores from here.
     </p>
-
   </div>
 
   <div class="message" id="message"></div>
@@ -423,11 +415,9 @@
       </p>
 
       <div id="requests">
-
         <div class="loading">
           Loading requests...
         </div>
-
       </div>
 
     </div>
@@ -518,14 +508,12 @@
       <!-- QUIZ LIST -->
 
       <div
-        style="margin-top:25px;"
+        class="quiz-list"
         id="quizList"
       >
-
         <div class="loading">
           Loading quizzes...
         </div>
-
       </div>
 
     </div>
@@ -554,7 +542,6 @@
         <table class="scores-table">
 
           <thead>
-
             <tr>
               <th>Student</th>
               <th>Quiz</th>
@@ -562,7 +549,6 @@
               <th>Percentage</th>
               <th>Submitted</th>
             </tr>
-
           </thead>
 
           <tbody id="scoresBody"></tbody>
@@ -664,13 +650,10 @@
   function showMessage(text) {
 
     message.textContent = text;
-
     message.style.display = "block";
 
     setTimeout(() => {
-
       message.style.display = "none";
-
     }, 3500);
 
   }
@@ -697,9 +680,7 @@
       await getDoc(userRef);
 
     if (!snapshot.exists()) {
-
       return null;
-
     }
 
     return snapshot.data();
@@ -801,15 +782,11 @@
         box.innerHTML = `
 
           <div class="request-name">
-            ${escapeHtml(
-              person.name || "Unknown User"
-            )}
+            ${escapeHtml(person.name || "Unknown User")}
           </div>
 
           <div class="request-email">
-            ${escapeHtml(
-              person.email || ""
-            )}
+            ${escapeHtml(person.email || "")}
           </div>
 
           <div class="actions">
@@ -904,8 +881,7 @@
     const box =
       document.createElement("div");
 
-    box.className =
-      "question-box";
+    box.className = "question-box";
 
     box.innerHTML = `
 
@@ -931,78 +907,52 @@
       <textarea
         class="question-text"
         placeholder="Write the question here..."
-      >${escapeHtml(
-        data?.question || ""
-      )}</textarea>
+      >${escapeHtml(data?.question || "")}</textarea>
 
       <div class="option-grid">
 
         <div>
-
-          <label>
-            Option A
-          </label>
+          <label>Option A</label>
 
           <input
             class="option-a"
             type="text"
-            value="${escapeHtml(
-              data?.options?.[0] || ""
-            )}"
+            value="${escapeHtml(data?.options?.[0] || "")}"
             placeholder="Option A"
           >
-
         </div>
 
         <div>
-
-          <label>
-            Option B
-          </label>
+          <label>Option B</label>
 
           <input
             class="option-b"
             type="text"
-            value="${escapeHtml(
-              data?.options?.[1] || ""
-            )}"
+            value="${escapeHtml(data?.options?.[1] || "")}"
             placeholder="Option B"
           >
-
         </div>
 
         <div>
-
-          <label>
-            Option C
-          </label>
+          <label>Option C</label>
 
           <input
             class="option-c"
             type="text"
-            value="${escapeHtml(
-              data?.options?.[2] || ""
-            )}"
+            value="${escapeHtml(data?.options?.[2] || "")}"
             placeholder="Option C"
           >
-
         </div>
 
         <div>
-
-          <label>
-            Option D
-          </label>
+          <label>Option D</label>
 
           <input
             class="option-d"
             type="text"
-            value="${escapeHtml(
-              data?.options?.[3] || ""
-            )}"
+            value="${escapeHtml(data?.options?.[3] || "")}"
             placeholder="Option D"
           >
-
         </div>
 
       </div>
@@ -1015,28 +965,28 @@
 
         <option
           value="0"
-          ${Number(data?.correctAnswer) === 0 ? "selected" : ""}
+          ${data?.correctAnswer === 0 ? "selected" : ""}
         >
           Option A
         </option>
 
         <option
           value="1"
-          ${Number(data?.correctAnswer) === 1 ? "selected" : ""}
+          ${data?.correctAnswer === 1 ? "selected" : ""}
         >
           Option B
         </option>
 
         <option
           value="2"
-          ${Number(data?.correctAnswer) === 2 ? "selected" : ""}
+          ${data?.correctAnswer === 2 ? "selected" : ""}
         >
           Option C
         </option>
 
         <option
           value="3"
-          ${Number(data?.correctAnswer) === 3 ? "selected" : ""}
+          ${data?.correctAnswer === 3 ? "selected" : ""}
         >
           Option D
         </option>
@@ -1053,7 +1003,6 @@
         () => {
 
           box.remove();
-
           renumberQuestions();
 
         }
@@ -1096,35 +1045,29 @@
     boxes.forEach((box) => {
 
       const question =
-        box.querySelector(
-          ".question-text"
-        ).value.trim();
+        box.querySelector(".question-text")
+          .value.trim();
 
       const options = [
 
-        box.querySelector(
-          ".option-a"
-        ).value.trim(),
+        box.querySelector(".option-a")
+          .value.trim(),
 
-        box.querySelector(
-          ".option-b"
-        ).value.trim(),
+        box.querySelector(".option-b")
+          .value.trim(),
 
-        box.querySelector(
-          ".option-c"
-        ).value.trim(),
+        box.querySelector(".option-c")
+          .value.trim(),
 
-        box.querySelector(
-          ".option-d"
-        ).value.trim()
+        box.querySelector(".option-d")
+          .value.trim()
 
       ];
 
       const correctAnswer =
         Number(
-          box.querySelector(
-            ".correct-answer"
-          ).value
+          box.querySelector(".correct-answer")
+            .value
         );
 
       questions.push({
@@ -1143,7 +1086,6 @@
   function resetQuizForm() {
 
     editingQuizId = null;
-
     questionNumber = 0;
 
     quizTitle.value = "";
@@ -1191,8 +1133,7 @@
       addQuestion();
 
       window.scrollTo({
-        top:
-          quizFormSection.offsetTop - 100,
+        top: quizFormSection.offsetTop - 100,
         behavior: "smooth"
       });
 
@@ -1203,9 +1144,7 @@
   addQuestionButton.addEventListener(
     "click",
     () => {
-
       addQuestion();
-
     }
   );
 
@@ -1213,9 +1152,7 @@
   cancelQuizButton.addEventListener(
     "click",
     () => {
-
       resetQuizForm();
-
     }
   );
 
@@ -1247,6 +1184,7 @@
 
       }
 
+
       if (!subject) {
 
         showMessage(
@@ -1256,6 +1194,7 @@
         return;
 
       }
+
 
       if (questions.length === 0) {
 
@@ -1299,13 +1238,9 @@
         const quizData = {
 
           title,
-
           subject,
-
           description,
-
           questions,
-
           published: false,
 
           updatedAt:
@@ -1336,10 +1271,7 @@
 
           const newRef =
             doc(
-              collection(
-                db,
-                "quizzes"
-              )
+              collection(db, "quizzes")
             );
 
           await setDoc(
@@ -1366,6 +1298,7 @@
 
         await loadQuizzes();
 
+
       } catch (error) {
 
         console.error(error);
@@ -1391,15 +1324,11 @@
     quizList.innerHTML =
       '<div class="loading">Loading quizzes...</div>';
 
-
     try {
 
       const snapshot =
         await getDocs(
-          collection(
-            db,
-            "quizzes"
-          )
+          collection(db, "quizzes")
         );
 
 
@@ -1424,8 +1353,7 @@
         const div =
           document.createElement("div");
 
-        div.className =
-          "quiz-item";
+        div.className = "quiz-item";
 
 
         div.innerHTML = `
@@ -1433,15 +1361,11 @@
           <div class="quiz-info">
 
             <h3>
-              ${escapeHtml(
-                quiz.title
-              )}
+              ${escapeHtml(quiz.title)}
             </h3>
 
             <p>
-              ${escapeHtml(
-                quiz.subject
-              )}
+              ${escapeHtml(quiz.subject)}
               •
               ${(quiz.questions || []).length}
               question(s)
@@ -1515,8 +1439,6 @@
       });
 
 
-      // EDIT
-
       quizList
         .querySelectorAll("[data-edit]")
         .forEach((button) => {
@@ -1524,18 +1446,20 @@
           button.addEventListener(
             "click",
             () => {
-
               editQuiz(
                 button.dataset.edit
               );
-
             }
           );
 
         });
 
 
-      // SHARE
+      /*
+        SHARE BUTTON
+        quiz.html এবং admin.html একই WEBNEST folder-এ
+        থাকলে এই URL automatically সঠিক হবে।
+      */
 
       quizList
         .querySelectorAll("[data-share]")
@@ -1549,137 +1473,44 @@
                 button.dataset.share;
 
 
-              /*
-                IMPORTANT:
-                quiz.html must be in the
-                same folder as admin.html
-              */
-
               const quizUrl =
                 new URL(
-                  `quiz.html?id=${encodeURIComponent(quizId)}`,
+                  "quiz.html",
                   window.location.href
-                ).href;
+                );
 
 
-              const shareData = {
+              quizUrl.searchParams.set(
+                "id",
+                quizId
+              );
 
-                title:
-                  "WebNest Quiz",
 
-                text:
-                  "Take this quiz!",
-
-                url:
-                  quizUrl
-
-              };
+              const finalUrl =
+                quizUrl.href;
 
 
               try {
 
-                // Mobile share
-
-                if (
-                  navigator.share &&
-                  /Android|iPhone|iPad|iPod/i
-                    .test(
-                      navigator.userAgent
-                    )
-                ) {
-
-                  await navigator.share(
-                    shareData
-                  );
-
-                  showMessage(
-                    "Quiz share করা হয়েছে."
-                  );
-
-                  return;
-
-                }
-
-
-                // Secure clipboard
-
-                if (
-                  navigator.clipboard &&
-                  window.isSecureContext
-                ) {
-
-                  await navigator.clipboard.writeText(
-                    quizUrl
-                  );
-
-                  showMessage(
-                    "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
-                  );
-
-                  return;
-
-                }
-
-
-                // Fallback copy
-
-                const textArea =
-                  document.createElement(
-                    "textarea"
-                  );
-
-                textArea.value =
-                  quizUrl;
-
-                textArea.style.position =
-                  "fixed";
-
-                textArea.style.left =
-                  "-9999px";
-
-                document.body.appendChild(
-                  textArea
+                await navigator.clipboard.writeText(
+                  finalUrl
                 );
-
-                textArea.focus();
-                textArea.select();
-
-                document.execCommand(
-                  "copy"
-                );
-
-                textArea.remove();
 
                 showMessage(
                   "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
                 );
 
-
               } catch (error) {
 
                 console.error(
-                  "Share error:",
+                  "Clipboard error:",
                   error
                 );
 
 
-                // User closed share window
-
-                if (
-                  error.name ===
-                  "AbortError"
-                ) {
-
-                  return;
-
-                }
-
-
-                // Last fallback
-
-                prompt(
-                  "এই Quiz Link-টি copy করো:",
-                  quizUrl
+                window.prompt(
+                  "এই link-টি copy করো:",
+                  finalUrl
                 );
 
               }
@@ -1690,8 +1521,6 @@
         });
 
 
-      // PUBLISH / UNPUBLISH
-
       quizList
         .querySelectorAll("[data-publish]")
         .forEach((button) => {
@@ -1699,18 +1528,14 @@
           button.addEventListener(
             "click",
             () => {
-
               togglePublish(
                 button.dataset.publish
               );
-
             }
           );
 
         });
 
-
-      // DELETE
 
       quizList
         .querySelectorAll("[data-delete]")
@@ -1719,11 +1544,9 @@
           button.addEventListener(
             "click",
             () => {
-
               deleteQuiz(
                 button.dataset.delete
               );
-
             }
           );
 
@@ -1760,10 +1583,7 @@
 
       const snapshot =
         await getDocs(
-          collection(
-            db,
-            "scores"
-          )
+          collection(db, "scores")
         );
 
 
@@ -1810,9 +1630,7 @@
       scores.forEach((score) => {
 
         const row =
-          document.createElement(
-            "tr"
-          );
+          document.createElement("tr");
 
 
         let submitted =
@@ -1826,11 +1644,8 @@
               score.submittedAt
             );
 
-          if (
-            !Number.isNaN(
-              date.getTime()
-            )
-          ) {
+
+          if (!Number.isNaN(date.getTime())) {
 
             submitted =
               date.toLocaleString();
@@ -1844,38 +1659,28 @@
 
           <td>
             ${escapeHtml(
-              score.studentName ||
-              "Unknown"
+              score.studentName || "Unknown"
             )}
           </td>
 
           <td>
             ${escapeHtml(
-              score.quizTitle ||
-              "Unknown Quiz"
+              score.quizTitle || "Unknown Quiz"
             )}
           </td>
 
           <td>
-            ${Number(
-              score.score || 0
-            )}
+            ${Number(score.score || 0)}
             /
-            ${Number(
-              score.total || 0
-            )}
+            ${Number(score.total || 0)}
           </td>
 
           <td class="score-percentage">
-            ${Number(
-              score.percentage || 0
-            )}%
+            ${Number(score.percentage || 0)}%
           </td>
 
           <td>
-            ${escapeHtml(
-              submitted
-            )}
+            ${escapeHtml(submitted)}
           </td>
 
         `;
@@ -1900,6 +1705,7 @@
         error
       );
 
+
       scoresMessage.textContent =
         "Could not load scores. Check Firestore Rules.";
 
@@ -1917,11 +1723,7 @@
 
       const snapshot =
         await getDoc(
-          doc(
-            db,
-            "quizzes",
-            id
-          )
+          doc(db, "quizzes", id)
         );
 
 
@@ -1940,9 +1742,7 @@
         snapshot.data();
 
 
-      editingQuizId =
-        id;
-
+      editingQuizId = id;
 
       quizTitle.value =
         quiz.title || "";
@@ -1954,22 +1754,17 @@
         quiz.description || "";
 
 
-      questionsContainer.innerHTML =
-        "";
+      questionsContainer.innerHTML = "";
 
       questionNumber = 0;
 
 
       (quiz.questions || [])
-        .forEach(
-          (question) => {
+        .forEach((question) => {
 
-            addQuestion(
-              question
-            );
+          addQuestion(question);
 
-          }
-        );
+        });
 
 
       if (
@@ -1994,10 +1789,8 @@
 
 
       window.scrollTo({
-        top:
-          quizFormSection.offsetTop - 100,
-        behavior:
-          "smooth"
+        top: quizFormSection.offsetTop - 100,
+        behavior: "smooth"
       });
 
 
@@ -2020,19 +1813,11 @@
 
       const snapshot =
         await getDoc(
-          doc(
-            db,
-            "quizzes",
-            id
-          )
+          doc(db, "quizzes", id)
         );
 
 
-      if (!snapshot.exists()) {
-
-        return;
-
-      }
+      if (!snapshot.exists()) return;
 
 
       const quiz =
@@ -2040,13 +1825,8 @@
 
 
       await updateDoc(
-        doc(
-          db,
-          "quizzes",
-          id
-        ),
+        doc(db, "quizzes", id),
         {
-
           published:
             !quiz.published,
 
@@ -2055,7 +1835,6 @@
 
           updatedBy:
             auth.currentUser.uid
-
         }
       );
 
@@ -2091,11 +1870,7 @@
       );
 
 
-    if (!confirmed) {
-
-      return;
-
-    }
+    if (!confirmed) return;
 
 
     try {
@@ -2149,16 +1924,10 @@
 
 
       const allowed =
-        await checkAccess(
-          user
-        );
+        await checkAccess(user);
 
 
-      if (!allowed) {
-
-        return;
-
-      }
+      if (!allowed) return;
 
 
       await loadRequests();
@@ -2175,20 +1944,10 @@
     "click",
     async () => {
 
-      try {
+      await signOut(auth);
 
-        await signOut(
-          auth
-        );
-
-        window.location.href =
-          "login.html";
-
-      } catch (error) {
-
-        console.error(error);
-
-      }
+      window.location.href =
+        "login.html";
 
     }
   );
