@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -117,7 +116,6 @@
       border-radius: 10px;
       background: #eff6ff;
       color: #1d4ed8;
-      font-weight: 600;
     }
 
     .quiz-list {
@@ -245,6 +243,13 @@
     select:focus {
       border-color: #2563eb;
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .time-help {
+      color: #64748b;
+      font-size: 13px;
+      margin-top: -10px;
+      margin-bottom: 17px;
     }
 
     .question-box {
@@ -398,7 +403,6 @@
 
   <div class="welcome">
     <h1>Admin Panel</h1>
-
     <p>
       Manage WebNest quizzes, users and student scores from here.
     </p>
@@ -472,4 +476,1520 @@
 
         <label for="quizDescription">
           Description
-```
+        </label>
+
+        <textarea
+          id="quizDescription"
+          placeholder="Short description of this quiz"
+        ></textarea>
+
+        <!-- TIMER SETTING -->
+
+        <label for="quizTimeLimit">
+          Time Limit (minutes)
+        </label>
+
+        <input
+          id="quizTimeLimit"
+          type="number"
+          min="0"
+          step="1"
+          value="30"
+          placeholder="Example: 30"
+        >
+
+        <p class="time-help">
+          Example: 30 = 30 minutes, 60 = 1 hour. 0 দিলে Timer বন্ধ থাকবে।
+        </p>
+
+        <div id="questionsContainer"></div>
+
+        <button
+          class="primary"
+          id="addQuestionButton"
+        >
+          + Add Question
+        </button>
+
+        <div class="form-buttons">
+
+          <button
+            class="primary"
+            id="saveQuizButton"
+          >
+            Save Quiz
+          </button>
+
+          <button
+            class="cancel"
+            id="cancelQuizButton"
+          >
+            Cancel
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- QUIZ LIST -->
+
+      <div
+        style="margin-top:25px;"
+        id="quizList"
+      >
+        <div class="loading">
+          Loading quizzes...
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- STUDENT SCORES -->
+
+    <div class="card">
+
+      <h2>📊 Student Scores</h2>
+
+      <p class="description">
+        View all submitted quiz results.
+      </p>
+
+      <div id="scoresMessage" class="loading">
+        Loading scores...
+      </div>
+
+      <div
+        id="scoresTableWrapper"
+        class="scores-table-wrapper"
+        style="display:none;"
+      >
+
+        <table class="scores-table">
+
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Quiz</th>
+              <th>Score</th>
+              <th>Percentage</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+
+          <tbody id="scoresBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+
+<script type="module">
+
+  import {
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+  import {
+    collection,
+    getDocs,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    deleteDoc
+  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+  import {
+    auth,
+    db
+  } from "./firebase.js";
+
+
+  const userEmail =
+    document.getElementById("userEmail");
+
+  const logoutButton =
+    document.getElementById("logoutButton");
+
+  const requestsContainer =
+    document.getElementById("requests");
+
+  const quizList =
+    document.getElementById("quizList");
+
+  const message =
+    document.getElementById("message");
+
+  const newQuizButton =
+    document.getElementById("newQuizButton");
+
+  const quizFormSection =
+    document.getElementById("quizFormSection");
+
+  const quizTitle =
+    document.getElementById("quizTitle");
+
+  const quizSubject =
+    document.getElementById("quizSubject");
+
+  const quizDescription =
+    document.getElementById("quizDescription");
+
+  const quizTimeLimit =
+    document.getElementById("quizTimeLimit");
+
+  const questionsContainer =
+    document.getElementById("questionsContainer");
+
+  const addQuestionButton =
+    document.getElementById("addQuestionButton");
+
+  const saveQuizButton =
+    document.getElementById("saveQuizButton");
+
+  const cancelQuizButton =
+    document.getElementById("cancelQuizButton");
+
+  const formTitle =
+    document.getElementById("formTitle");
+
+  const scoresMessage =
+    document.getElementById("scoresMessage");
+
+  const scoresTableWrapper =
+    document.getElementById("scoresTableWrapper");
+
+  const scoresBody =
+    document.getElementById("scoresBody");
+
+
+  let currentUserData = null;
+
+  let editingQuizId = null;
+
+  let questionNumber = 0;
+
+
+  function showMessage(text) {
+
+    message.textContent = text;
+
+    message.style.display = "block";
+
+    setTimeout(() => {
+      message.style.display = "none";
+    }, 3500);
+
+  }
+
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  }
+
+
+  async function getCurrentUserData(user) {
+
+    const userRef =
+      doc(db, "users", user.uid);
+
+    const snapshot =
+      await getDoc(userRef);
+
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return snapshot.data();
+
+  }
+
+
+  async function checkAccess(user) {
+
+    const data =
+      await getCurrentUserData(user);
+
+    if (!data) {
+
+      window.location.href =
+        "index.html";
+
+      return false;
+
+    }
+
+    if (
+      data.role !== "owner" &&
+      data.role !== "admin"
+    ) {
+
+      window.location.href =
+        "index.html";
+
+      return false;
+
+    }
+
+    currentUserData = data;
+
+    return true;
+
+  }
+
+
+  async function loadRequests() {
+
+    if (!currentUserData) return;
+
+    if (currentUserData.role !== "owner") {
+
+      requestsContainer.innerHTML =
+        '<div class="empty">Only the Owner can approve new admins.</div>';
+
+      return;
+
+    }
+
+    requestsContainer.innerHTML =
+      '<div class="loading">Loading requests...</div>';
+
+    try {
+
+      const snapshot =
+        await getDocs(
+          collection(db, "users")
+        );
+
+      const pending = [];
+
+      snapshot.forEach((item) => {
+
+        const data = item.data();
+
+        if (data.role === "pending") {
+
+          pending.push({
+            id: item.id,
+            ...data
+          });
+
+        }
+
+      });
+
+      if (pending.length === 0) {
+
+        requestsContainer.innerHTML =
+          '<div class="empty">No pending requests.</div>';
+
+        return;
+
+      }
+
+      requestsContainer.innerHTML = "";
+
+      pending.forEach((person) => {
+
+        const box =
+          document.createElement("div");
+
+        box.className = "request";
+
+        box.innerHTML = `
+
+          <div class="request-name">
+            ${escapeHtml(person.name || "Unknown User")}
+          </div>
+
+          <div class="request-email">
+            ${escapeHtml(person.email || "")}
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="publish"
+              data-user="${person.id}"
+            >
+              Approve
+            </button>
+
+            <button
+              class="delete"
+              data-user="${person.id}"
+            >
+              Reject
+            </button>
+
+          </div>
+
+        `;
+
+        requestsContainer.appendChild(box);
+
+      });
+
+
+      document
+        .querySelectorAll("[data-user]")
+        .forEach((button) => {
+
+          button.addEventListener(
+            "click",
+            async () => {
+
+              const id =
+                button.dataset.user;
+
+              const newRole =
+                button.classList.contains("publish")
+                  ? "admin"
+                  : "rejected";
+
+              try {
+
+                await updateDoc(
+                  doc(db, "users", id),
+                  {
+                    role: newRole
+                  }
+                );
+
+                showMessage(
+                  newRole === "admin"
+                    ? "Admin approved."
+                    : "Request rejected."
+                );
+
+                await loadRequests();
+
+              } catch (error) {
+
+                console.error(error);
+
+                showMessage(
+                  "Could not update the request."
+                );
+
+              }
+
+            }
+          );
+
+        });
+
+    } catch (error) {
+
+      console.error(error);
+
+      requestsContainer.innerHTML =
+        '<div class="empty">Could not load requests.</div>';
+
+    }
+
+  }
+
+
+  function addQuestion(data = null) {
+
+    questionNumber++;
+
+    const box =
+      document.createElement("div");
+
+    box.className = "question-box";
+
+    box.dataset.questionId =
+      questionNumber;
+
+    box.innerHTML = `
+
+      <div class="question-header">
+
+        <strong>
+          Question ${questionNumber}
+        </strong>
+
+        <button
+          type="button"
+          class="remove-question"
+        >
+          Remove
+        </button>
+
+      </div>
+
+      <label>
+        Question
+      </label>
+
+      <textarea
+        class="question-text"
+        placeholder="Write the question here..."
+      >${escapeHtml(data?.question || "")}</textarea>
+
+      <div class="option-grid">
+
+        <div>
+          <label>Option A</label>
+
+          <input
+            class="option-a"
+            type="text"
+            value="${escapeHtml(data?.options?.[0] || "")}"
+            placeholder="Option A"
+          >
+        </div>
+
+        <div>
+          <label>Option B</label>
+
+          <input
+            class="option-b"
+            type="text"
+            value="${escapeHtml(data?.options?.[1] || "")}"
+            placeholder="Option B"
+          >
+        </div>
+
+        <div>
+          <label>Option C</label>
+
+          <input
+            class="option-c"
+            type="text"
+            value="${escapeHtml(data?.options?.[2] || "")}"
+            placeholder="Option C"
+          >
+        </div>
+
+        <div>
+          <label>Option D</label>
+
+          <input
+            class="option-d"
+            type="text"
+            value="${escapeHtml(data?.options?.[3] || "")}"
+            placeholder="Option D"
+          >
+        </div>
+
+      </div>
+
+      <label>
+        Correct Answer
+      </label>
+
+      <select class="correct-answer">
+
+        <option
+          value="0"
+          ${Number(data?.correctAnswer) === 0 ? "selected" : ""}
+        >
+          Option A
+        </option>
+
+        <option
+          value="1"
+          ${Number(data?.correctAnswer) === 1 ? "selected" : ""}
+        >
+          Option B
+        </option>
+
+        <option
+          value="2"
+          ${Number(data?.correctAnswer) === 2 ? "selected" : ""}
+        >
+          Option C
+        </option>
+
+        <option
+          value="3"
+          ${Number(data?.correctAnswer) === 3 ? "selected" : ""}
+        >
+          Option D
+        </option>
+
+      </select>
+
+    `;
+
+    box
+      .querySelector(".remove-question")
+      .addEventListener(
+        "click",
+        () => {
+
+          box.remove();
+
+          renumberQuestions();
+
+        }
+      );
+
+    questionsContainer.appendChild(box);
+
+  }
+
+
+  function renumberQuestions() {
+
+    const boxes =
+      questionsContainer.querySelectorAll(
+        ".question-box"
+      );
+
+    boxes.forEach((box, index) => {
+
+      box.querySelector(
+        ".question-header strong"
+      ).textContent =
+        `Question ${index + 1}`;
+
+    });
+
+  }
+
+
+  function collectQuestions() {
+
+    const boxes =
+      questionsContainer.querySelectorAll(
+        ".question-box"
+      );
+
+    const questions = [];
+
+    boxes.forEach((box) => {
+
+      const question =
+        box.querySelector(".question-text")
+          .value.trim();
+
+      const options = [
+
+        box.querySelector(".option-a")
+          .value.trim(),
+
+        box.querySelector(".option-b")
+          .value.trim(),
+
+        box.querySelector(".option-c")
+          .value.trim(),
+
+        box.querySelector(".option-d")
+          .value.trim()
+
+      ];
+
+      const correctAnswer =
+        Number(
+          box.querySelector(".correct-answer")
+            .value
+        );
+
+      questions.push({
+        question,
+        options,
+        correctAnswer
+      });
+
+    });
+
+    return questions;
+
+  }
+
+
+  function resetQuizForm() {
+
+    editingQuizId = null;
+
+    questionNumber = 0;
+
+    quizTitle.value = "";
+
+    quizSubject.value = "";
+
+    quizDescription.value = "";
+
+    quizTimeLimit.value = "30";
+
+    questionsContainer.innerHTML = "";
+
+    formTitle.textContent =
+      "Create New Quiz";
+
+    saveQuizButton.textContent =
+      "Save Quiz";
+
+    quizFormSection.classList.remove(
+      "active"
+    );
+
+  }
+
+
+  newQuizButton.addEventListener(
+    "click",
+    () => {
+
+      editingQuizId = null;
+
+      questionNumber = 0;
+
+      quizTitle.value = "";
+
+      quizSubject.value = "";
+
+      quizDescription.value = "";
+
+      quizTimeLimit.value = "30";
+
+      questionsContainer.innerHTML = "";
+
+      formTitle.textContent =
+        "Create New Quiz";
+
+      saveQuizButton.textContent =
+        "Save Quiz";
+
+      quizFormSection.classList.add(
+        "active"
+      );
+
+      addQuestion();
+
+      window.scrollTo({
+        top: quizFormSection.offsetTop - 100,
+        behavior: "smooth"
+      });
+
+    }
+  );
+
+
+  addQuestionButton.addEventListener(
+    "click",
+    () => {
+      addQuestion();
+    }
+  );
+
+
+  cancelQuizButton.addEventListener(
+    "click",
+    () => {
+      resetQuizForm();
+    }
+  );
+
+
+  saveQuizButton.addEventListener(
+    "click",
+    async () => {
+
+      const title =
+        quizTitle.value.trim();
+
+      const subject =
+        quizSubject.value.trim();
+
+      const description =
+        quizDescription.value.trim();
+
+      const timeLimit =
+        Math.max(
+          0,
+          Number(quizTimeLimit.value) || 0
+        );
+
+      const questions =
+        collectQuestions();
+
+
+      if (!title) {
+
+        showMessage(
+          "Please enter a quiz title."
+        );
+
+        return;
+
+      }
+
+
+      if (!subject) {
+
+        showMessage(
+          "Please enter the subject."
+        );
+
+        return;
+
+      }
+
+
+      if (questions.length === 0) {
+
+        showMessage(
+          "Please add at least one question."
+        );
+
+        return;
+
+      }
+
+
+      for (const question of questions) {
+
+        if (
+          !question.question ||
+          question.options.some(
+            option => !option
+          )
+        ) {
+
+          showMessage(
+            "Please complete every question and all 4 options."
+          );
+
+          return;
+
+        }
+
+      }
+
+
+      saveQuizButton.disabled = true;
+
+      saveQuizButton.textContent =
+        "Saving...";
+
+
+      try {
+
+        const quizData = {
+
+          title,
+
+          subject,
+
+          description,
+
+          timeLimit,
+
+          questions,
+
+          published: false,
+
+          updatedAt:
+            new Date().toISOString(),
+
+          updatedBy:
+            auth.currentUser.uid
+
+        };
+
+
+        if (editingQuizId) {
+
+          await updateDoc(
+            doc(
+              db,
+              "quizzes",
+              editingQuizId
+            ),
+            quizData
+          );
+
+          showMessage(
+            "Quiz updated successfully."
+          );
+
+        } else {
+
+          const newRef =
+            doc(
+              collection(db, "quizzes")
+            );
+
+          await setDoc(
+            newRef,
+            {
+              ...quizData,
+
+              createdAt:
+                new Date().toISOString(),
+
+              createdBy:
+                auth.currentUser.uid
+            }
+          );
+
+          showMessage(
+            "Quiz created successfully."
+          );
+
+        }
+
+
+        resetQuizForm();
+
+        await loadQuizzes();
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "Could not save quiz. Check Firestore rules."
+        );
+
+      }
+
+
+      saveQuizButton.disabled = false;
+
+      saveQuizButton.textContent =
+        "Save Quiz";
+
+    }
+  );
+
+
+  async function loadQuizzes() {
+
+    quizList.innerHTML =
+      '<div class="loading">Loading quizzes...</div>';
+
+    try {
+
+      const snapshot =
+        await getDocs(
+          collection(db, "quizzes")
+        );
+
+
+      if (snapshot.empty) {
+
+        quizList.innerHTML =
+          '<div class="empty">No quizzes created yet.</div>';
+
+        return;
+
+      }
+
+
+      quizList.innerHTML = "";
+
+
+      snapshot.forEach((item) => {
+
+        const quiz =
+          item.data();
+
+        const div =
+          document.createElement("div");
+
+        div.className = "quiz-item";
+
+
+        const timeText =
+          Number(quiz.timeLimit) > 0
+            ? `${Number(quiz.timeLimit)} min`
+            : "Timer Off";
+
+
+        div.innerHTML = `
+
+          <div class="quiz-info">
+
+            <h3>
+              ${escapeHtml(quiz.title)}
+            </h3>
+
+            <p>
+              ${escapeHtml(quiz.subject)}
+              •
+              ${(quiz.questions || []).length}
+              question(s)
+              •
+              ⏱️ ${timeText}
+            </p>
+
+            <span
+              class="badge ${
+                quiz.published
+                  ? "published"
+                  : "draft"
+              }"
+            >
+              ${
+                quiz.published
+                  ? "Published"
+                  : "Draft"
+              }
+            </span>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button
+              class="edit"
+              data-edit="${item.id}"
+            >
+              Edit
+            </button>
+
+
+            <button
+              class="${
+                quiz.published
+                  ? "unpublish"
+                  : "publish"
+              }"
+              data-publish="${item.id}"
+            >
+              ${
+                quiz.published
+                  ? "Unpublish"
+                  : "Publish"
+              }
+            </button>
+
+
+            <button
+              class="share"
+              data-share="${item.id}"
+            >
+              🔗 Share
+            </button>
+
+
+            <button
+              class="delete"
+              data-delete="${item.id}"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        `;
+
+
+        quizList.appendChild(div);
+
+      });
+
+
+      document
+        .querySelectorAll("[data-edit]")
+        .forEach((button) => {
+
+          button.addEventListener(
+            "click",
+            () =>
+              editQuiz(
+                button.dataset.edit
+              )
+          );
+
+        });
+
+
+      document
+        .querySelectorAll("[data-share]")
+        .forEach((button) => {
+
+          button.addEventListener(
+            "click",
+            async () => {
+
+              const quizId =
+                button.dataset.share;
+
+              const quizUrl =
+                `${window.location.origin}/quiz.html?id=${quizId}`;
+
+              try {
+
+                await navigator.clipboard.writeText(
+                  quizUrl
+                );
+
+                showMessage(
+                  "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
+                );
+
+              } catch (error) {
+
+                console.error(error);
+
+                prompt(
+                  "Copy this quiz link:",
+                  quizUrl
+                );
+
+              }
+
+            }
+          );
+
+        });
+
+
+      document
+        .querySelectorAll("[data-publish]")
+        .forEach((button) => {
+
+          button.addEventListener(
+            "click",
+            () =>
+              togglePublish(
+                button.dataset.publish
+              )
+          );
+
+        });
+
+
+      document
+        .querySelectorAll("[data-delete]")
+        .forEach((button) => {
+
+          button.addEventListener(
+            "click",
+            () =>
+              deleteQuiz(
+                button.dataset.delete
+              )
+          );
+
+        });
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      quizList.innerHTML =
+        '<div class="empty">Could not load quizzes. Firestore rules may need updating.</div>';
+
+    }
+
+  }
+
+
+  async function loadScores() {
+
+    scoresMessage.textContent =
+      "Loading scores...";
+
+    scoresMessage.style.display =
+      "block";
+
+    scoresTableWrapper.style.display =
+      "none";
+
+    scoresBody.innerHTML = "";
+
+
+    try {
+
+      const snapshot =
+        await getDocs(
+          collection(db, "scores")
+        );
+
+
+      if (snapshot.empty) {
+
+        scoresMessage.textContent =
+          "No quiz scores yet.";
+
+        return;
+
+      }
+
+
+      const scores = [];
+
+
+      snapshot.forEach((item) => {
+
+        scores.push({
+          id: item.id,
+          ...item.data()
+        });
+
+      });
+
+
+      scores.sort((a, b) => {
+
+        const dateA =
+          new Date(
+            a.submittedAt || 0
+          ).getTime();
+
+        const dateB =
+          new Date(
+            b.submittedAt || 0
+          ).getTime();
+
+        return dateB - dateA;
+
+      });
+
+
+      scores.forEach((score) => {
+
+        const row =
+          document.createElement("tr");
+
+        let submitted =
+          "-";
+
+
+        if (score.submittedAt) {
+
+          const date =
+            new Date(
+              score.submittedAt
+            );
+
+          if (!Number.isNaN(date.getTime())) {
+
+            submitted =
+              date.toLocaleString();
+
+          }
+
+        }
+
+
+        row.innerHTML = `
+
+          <td>
+            ${escapeHtml(
+              score.studentName || "Unknown"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              score.quizTitle || "Unknown Quiz"
+            )}
+          </td>
+
+          <td>
+            ${Number(score.score || 0)}
+            /
+            ${Number(score.total || 0)}
+          </td>
+
+          <td class="score-percentage">
+            ${Number(score.percentage || 0)}%
+          </td>
+
+          <td>
+            ${escapeHtml(submitted)}
+          </td>
+
+        `;
+
+
+        scoresBody.appendChild(row);
+
+      });
+
+
+      scoresMessage.style.display =
+        "none";
+
+      scoresTableWrapper.style.display =
+        "block";
+
+
+    } catch (error) {
+
+      console.error(
+        "Score loading error:",
+        error
+      );
+
+      scoresMessage.textContent =
+        "Could not load scores. Check Firestore Rules.";
+
+      scoresMessage.style.display =
+        "block";
+
+    }
+
+  }
+
+
+  async function editQuiz(id) {
+
+    try {
+
+      const snapshot =
+        await getDoc(
+          doc(db, "quizzes", id)
+        );
+
+
+      if (!snapshot.exists()) {
+
+        showMessage(
+          "Quiz not found."
+        );
+
+        return;
+
+      }
+
+
+      const quiz =
+        snapshot.data();
+
+
+      editingQuizId = id;
+
+      quizTitle.value =
+        quiz.title || "";
+
+      quizSubject.value =
+        quiz.subject || "";
+
+      quizDescription.value =
+        quiz.description || "";
+
+      quizTimeLimit.value =
+        quiz.timeLimit ?? 30;
+
+
+      questionsContainer.innerHTML = "";
+
+      questionNumber = 0;
+
+
+      (quiz.questions || [])
+        .forEach((question) => {
+
+          addQuestion(question);
+
+        });
+
+
+      if (
+        !quiz.questions ||
+        quiz.questions.length === 0
+      ) {
+
+        addQuestion();
+
+      }
+
+
+      formTitle.textContent =
+        "Edit Quiz";
+
+      saveQuizButton.textContent =
+        "Update Quiz";
+
+      quizFormSection.classList.add(
+        "active"
+      );
+
+
+      window.scrollTo({
+        top: quizFormSection.offsetTop - 100,
+        behavior: "smooth"
+      });
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "Could not open quiz."
+      );
+
+    }
+
+  }
+
+
+  async function togglePublish(id) {
+
+    try {
+
+      const snapshot =
+        await getDoc(
+          doc(db, "quizzes", id)
+        );
+
+
+      if (!snapshot.exists()) return;
+
+
+      const quiz =
+        snapshot.data();
+
+
+      await updateDoc(
+        doc(db, "quizzes", id),
+        {
+          published:
+            !quiz.published,
+
+          updatedAt:
+            new Date().toISOString(),
+
+          updatedBy:
+            auth.currentUser.uid
+        }
+      );
+
+
+      showMessage(
+        quiz.published
+          ? "Quiz unpublished."
+          : "Quiz published."
+      );
+
+
+      await loadQuizzes();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "Could not change quiz status."
+      );
+
+    }
+
+  }
+
+
+  async function deleteQuiz(id) {
+
+    const confirmed =
+      confirm(
+        "Are you sure you want to delete this quiz?"
+      );
+
+
+    if (!confirmed) return;
+
+
+    try {
+
+      await deleteDoc(
+        doc(
+          db,
+          "quizzes",
+          id
+        )
+      );
+
+
+      showMessage(
+        "Quiz deleted."
+      );
+
+
+      await loadQuizzes();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "Could not delete quiz."
+      );
+
+    }
+
+  }
+
+
+  onAuthStateChanged(
+    auth,
+    async (user) => {
+
+      if (!user) {
+
+        window.location.href =
+          "login.html";
+
+        return;
+
+      }
+
+
+      userEmail.textContent =
+        user.email || "";
+
+
+      const allowed =
+        await checkAccess(user);
+
+
+      if (!allowed) return;
+
+
+      await loadRequests();
+
+      await loadQuizzes();
+
+      await loadScores();
+
+    }
+  );
+
+
+  logoutButton.addEventListener(
+    "click",
+    async () => {
+
+      await signOut(auth);
+
+      window.location.href =
+        "login.html";
+
+    }
+  );
+
+</script>
+
+</body>
+</html>
