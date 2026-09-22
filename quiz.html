@@ -295,6 +295,7 @@
     }
 
     @media (max-width: 600px) {
+
       .quiz-title {
         font-size: 25px;
       }
@@ -323,6 +324,7 @@
         font-size: 13px;
         padding: 8px 10px;
       }
+
     }
   </style>
 </head>
@@ -330,44 +332,89 @@
 <body>
 
 <header>
+
   <div class="header-inner">
-    <div class="logo">WebNest</div>
-    <div class="timer" id="timer">⏱️ 30:00</div>
+
+    <div class="logo">
+      WebNest
+    </div>
+
+    <div
+      class="timer"
+      id="timer">
+      ⏱️ 30:00
+    </div>
+
   </div>
+
 </header>
+
 
 <main>
 
-  <div id="loading" class="card loading">
+  <div
+    id="loading"
+    class="card loading">
     Loading quiz...
   </div>
 
-  <div id="quizCard" class="card" style="display:none;">
 
-    <h1 class="quiz-title" id="quizTitle">
+  <div
+    id="quizCard"
+    class="card"
+    style="display:none;">
+
+    <h1
+      class="quiz-title"
+      id="quizTitle">
       Quiz
     </h1>
 
-    <p class="quiz-info" id="quizInfo"></p>
+    <p
+      class="quiz-info"
+      id="quizInfo">
+    </p>
+
 
     <div class="progress-area">
 
       <div class="progress-top">
-        <span id="progressText">0 / 0 answered</span>
-        <span id="progressPercent">0%</span>
+
+        <span id="progressText">
+          0 / 0 answered
+        </span>
+
+        <span id="progressPercent">
+          0%
+        </span>
+
       </div>
 
+
       <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+
+        <div
+          class="progress-fill"
+          id="progressFill">
+        </div>
+
       </div>
 
     </div>
 
-    <div id="errorMessage" class="message error"></div>
 
-    <label class="name-label" for="studentName">
+    <div
+      id="errorMessage"
+      class="message error">
+    </div>
+
+
+    <label
+      class="name-label"
+      for="studentName">
       Your Name
     </label>
+
 
     <input
       class="name-input"
@@ -376,56 +423,100 @@
       placeholder="Enter your name"
     >
 
-    <div id="questionsContainer"></div>
+
+    <div
+      id="questionsContainer">
+    </div>
+
 
     <button
       class="submit-button"
-      id="submitButton"
-    >
+      id="submitButton">
       Submit Quiz
     </button>
 
   </div>
 
-  <div id="resultCard" class="card result">
 
-    <div class="result-icon">🎉</div>
+  <div
+    id="resultCard"
+    class="card result">
 
-    <h2>Quiz Completed!</h2>
+    <div class="result-icon">
+      🎉
+    </div>
 
-    <div class="result-score" id="resultScore">
+    <h2>
+      Quiz Completed!
+    </h2>
+
+
+    <div
+      class="result-score"
+      id="resultScore">
       0/0
     </div>
 
-    <div class="result-percentage" id="resultPercentage">
+
+    <div
+      class="result-percentage"
+      id="resultPercentage">
       0%
     </div>
 
-    <p class="result-text" id="resultStudent"></p>
+
+    <p
+      class="result-text"
+      id="resultStudent">
+    </p>
+
 
     <div class="result-details">
 
       <div class="result-box">
-        <strong id="correctCount">0</strong>
-        <span>Correct</span>
+
+        <strong id="correctCount">
+          0
+        </strong>
+
+        <span>
+          Correct
+        </span>
+
       </div>
 
-      <div class="result-box">
-        <strong id="wrongCount">0</strong>
-        <span>Wrong</span>
-      </div>
 
       <div class="result-box">
-        <strong id="totalCount">0</strong>
-        <span>Total</span>
+
+        <strong id="wrongCount">
+          0
+        </strong>
+
+        <span>
+          Wrong
+        </span>
+
+      </div>
+
+
+      <div class="result-box">
+
+        <strong id="totalCount">
+          0
+        </strong>
+
+        <span>
+          Total
+        </span>
+
       </div>
 
     </div>
 
+
     <button
       class="restart-button"
-      onclick="window.location.reload()"
-    >
+      onclick="window.location.reload()">
       Try Again
     </button>
 
@@ -433,606 +524,856 @@
 
 </main>
 
+
 <script type="module">
 
-  import {
-    collection,
-    doc,
-    getDoc,
-    setDoc
-  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-  import {
-    db
-  } from "./firebase.js";
 
+import {
+  db
+}
+from "./firebase.js";
 
-  const loading =
-    document.getElementById("loading");
 
-  const quizCard =
-    document.getElementById("quizCard");
 
-  const resultCard =
-    document.getElementById("resultCard");
+const loading =
+  document.getElementById("loading");
 
-  const quizTitle =
-    document.getElementById("quizTitle");
 
-  const quizInfo =
-    document.getElementById("quizInfo");
+const quizCard =
+  document.getElementById("quizCard");
 
-  const questionsContainer =
-    document.getElementById("questionsContainer");
 
-  const studentName =
-    document.getElementById("studentName");
+const resultCard =
+  document.getElementById("resultCard");
 
-  const submitButton =
-    document.getElementById("submitButton");
 
-  const errorMessage =
-    document.getElementById("errorMessage");
+const quizTitle =
+  document.getElementById("quizTitle");
 
-  const resultScore =
-    document.getElementById("resultScore");
 
-  const resultPercentage =
-    document.getElementById("resultPercentage");
+const quizInfo =
+  document.getElementById("quizInfo");
 
-  const resultStudent =
-    document.getElementById("resultStudent");
 
-  const correctCount =
-    document.getElementById("correctCount");
+const questionsContainer =
+  document.getElementById("questionsContainer");
 
-  const wrongCount =
-    document.getElementById("wrongCount");
 
-  const totalCount =
-    document.getElementById("totalCount");
+const studentName =
+  document.getElementById("studentName");
 
-  const timerElement =
-    document.getElementById("timer");
 
-  const progressText =
-    document.getElementById("progressText");
+const submitButton =
+  document.getElementById("submitButton");
 
-  const progressPercent =
-    document.getElementById("progressPercent");
 
-  const progressFill =
-    document.getElementById("progressFill");
+const errorMessage =
+  document.getElementById("errorMessage");
 
 
-  let currentQuiz = null;
-  let currentQuizId = null;
+const resultScore =
+  document.getElementById("resultScore");
 
-  let timerSeconds = 30 * 60;
 
-  let timerInterval = null;
+const resultPercentage =
+  document.getElementById("resultPercentage");
 
-  let quizSubmitted = false;
 
+const resultStudent =
+  document.getElementById("resultStudent");
 
-  function showError(text) {
 
-    errorMessage.textContent = text;
+const correctCount =
+  document.getElementById("correctCount");
 
-    errorMessage.style.display = "block";
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+const wrongCount =
+  document.getElementById("wrongCount");
 
-  }
 
+const totalCount =
+  document.getElementById("totalCount");
 
-  function escapeHtml(value) {
 
-    return String(value || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+const timerElement =
+  document.getElementById("timer");
 
-  }
 
+const progressText =
+  document.getElementById("progressText");
 
-  function getQuizId() {
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+const progressPercent =
+  document.getElementById("progressPercent");
 
-    return params.get("id");
 
-  }
+const progressFill =
+  document.getElementById("progressFill");
 
 
-  function updateTimer() {
 
-    const minutes =
-      Math.floor(timerSeconds / 60);
+let currentQuiz = null;
 
-    const seconds =
-      timerSeconds % 60;
+let currentQuizId = null;
 
-    timerElement.textContent =
-      `⏱️ ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+let timerSeconds = 30 * 60;
 
-    if (timerSeconds <= 60) {
-      timerElement.classList.add("warning");
-    }
+let timerInterval = null;
 
-    if (timerSeconds <= 0) {
+let quizSubmitted = false;
 
-      clearInterval(timerInterval);
 
-      if (!quizSubmitted) {
-        submitQuiz(true);
-      }
 
-    }
+function showError(text){
 
-    timerSeconds--;
+  errorMessage.textContent =
+    text;
 
-  }
+  errorMessage.style.display =
+    "block";
 
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 
-  function startTimer() {
+}
 
-    updateTimer();
 
-    timerInterval =
-      setInterval(updateTimer, 1000);
 
-  }
+function escapeHtml(value){
 
+  return String(value || "")
 
-  function updateProgress() {
+    .replaceAll("&","&amp;")
 
-    const questions =
-      currentQuiz?.questions || [];
+    .replaceAll("<","&lt;")
 
-    const total =
-      questions.length;
+    .replaceAll(">","&gt;")
 
-    let answered = 0;
+    .replaceAll('"',"&quot;")
 
-    for (let i = 0; i < total; i++) {
+    .replaceAll("'","&#039;");
 
-      const selected =
-        document.querySelector(
-          `input[name="question-${i}"]:checked`
-        );
+}
 
-      if (selected) {
-        answered++;
-      }
 
-    }
 
-    const percentage =
-      total === 0
-        ? 0
-        : Math.round((answered / total) * 100);
+function getQuizId(){
 
-    progressText.textContent =
-      `${answered} / ${total} answered`;
-
-    progressPercent.textContent =
-      `${percentage}%`;
-
-    progressFill.style.width =
-      `${percentage}%`;
-
-  }
-
-
-  function renderQuestions(questions) {
-
-    questionsContainer.innerHTML = "";
-
-    questions.forEach(
-      (question, index) => {
-
-        const box =
-          document.createElement("div");
-
-        box.className =
-          "question";
-
-        let optionsHtml = "";
-
-        question.options.forEach(
-          (option, optionIndex) => {
-
-            const letter =
-              String.fromCharCode(
-                65 + optionIndex
-              );
-
-            optionsHtml += `
-
-              <label
-                class="option"
-                data-option="${index}-${optionIndex}"
-              >
-
-                <input
-                  type="radio"
-                  name="question-${index}"
-                  value="${optionIndex}"
-                >
-
-                <span class="option-letter">
-                  ${letter}.
-                </span>
-
-                <span>
-                  ${escapeHtml(option)}
-                </span>
-
-              </label>
-
-            `;
-
-          }
-        );
-
-        box.innerHTML = `
-
-          <div class="question-number">
-            QUESTION ${index + 1}
-          </div>
-
-          <div class="question-text">
-            ${escapeHtml(question.question)}
-          </div>
-
-          ${optionsHtml}
-
-        `;
-
-        questionsContainer.appendChild(box);
-
-      }
+  const params =
+    new URLSearchParams(
+      window.location.search
     );
 
+  return params.get("id");
 
-    document
-      .querySelectorAll(".option")
-      .forEach((option) => {
+}
+
+
+
+/*
+  TIMER
+  Admin Panel থেকে durationMinutes নেওয়া হবে।
+
+  Example:
+  30  = 30 minutes
+  60  = 1 hour
+  90  = 1 hour 30 minutes
+  120 = 2 hours
+*/
+
+
+function updateTimer(){
+
+  const hours =
+    Math.floor(
+      timerSeconds / 3600
+    );
+
+  const minutes =
+    Math.floor(
+      (timerSeconds % 3600) / 60
+    );
+
+  const seconds =
+    timerSeconds % 60;
+
+
+  let displayTime;
+
+
+  if(hours > 0){
+
+    displayTime =
+      `${String(hours).padStart(2,"0")}:` +
+      `${String(minutes).padStart(2,"0")}:` +
+      `${String(seconds).padStart(2,"0")}`;
+
+  }
+  else{
+
+    displayTime =
+      `${String(minutes).padStart(2,"0")}:` +
+      `${String(seconds).padStart(2,"0")}`;
+
+  }
+
+
+  timerElement.textContent =
+    `⏱️ ${displayTime}`;
+
+
+  if(timerSeconds <= 60){
+
+    timerElement.classList.add(
+      "warning"
+    );
+
+  }
+
+
+  if(timerSeconds <= 0){
+
+    clearInterval(
+      timerInterval
+    );
+
+    if(!quizSubmitted){
+
+      submitQuiz(true);
+
+    }
+
+    return;
+
+  }
+
+
+  timerSeconds--;
+
+}
+
+
+
+function startTimer(){
+
+  clearInterval(
+    timerInterval
+  );
+
+  updateTimer();
+
+  timerInterval =
+    setInterval(
+      updateTimer,
+      1000
+    );
+
+}
+
+
+
+function updateProgress(){
+
+  const questions =
+    currentQuiz?.questions || [];
+
+  const total =
+    questions.length;
+
+  let answered = 0;
+
+
+  for(
+    let i = 0;
+    i < total;
+    i++
+  ){
+
+    const selected =
+      document.querySelector(
+        `input[name="question-${i}"]:checked`
+      );
+
+    if(selected){
+
+      answered++;
+
+    }
+
+  }
+
+
+  const percentage =
+    total === 0
+      ? 0
+      : Math.round(
+          (answered / total) * 100
+        );
+
+
+  progressText.textContent =
+    `${answered} / ${total} answered`;
+
+
+  progressPercent.textContent =
+    `${percentage}%`;
+
+
+  progressFill.style.width =
+    `${percentage}%`;
+
+}
+
+
+
+function renderQuestions(
+  questions
+){
+
+  questionsContainer.innerHTML =
+    "";
+
+
+  questions.forEach(
+    (question,index) => {
+
+      const box =
+        document.createElement(
+          "div"
+        );
+
+      box.className =
+        "question";
+
+
+      let optionsHtml =
+        "";
+
+
+      question.options.forEach(
+        (option,optionIndex) => {
+
+          const letter =
+            String.fromCharCode(
+              65 + optionIndex
+            );
+
+
+          optionsHtml += `
+
+            <label
+              class="option"
+              data-option="${index}-${optionIndex}">
+
+              <input
+                type="radio"
+                name="question-${index}"
+                value="${optionIndex}">
+
+              <span class="option-letter">
+                ${letter}.
+              </span>
+
+              <span>
+                ${escapeHtml(option)}
+              </span>
+
+            </label>
+
+          `;
+
+        }
+      );
+
+
+      box.innerHTML = `
+
+        <div class="question-number">
+          QUESTION ${index + 1}
+        </div>
+
+        <div class="question-text">
+          ${escapeHtml(question.question)}
+        </div>
+
+        ${optionsHtml}
+
+      `;
+
+
+      questionsContainer.appendChild(
+        box
+      );
+
+    }
+  );
+
+
+  document
+    .querySelectorAll(".option")
+    .forEach(
+      option => {
 
         option.addEventListener(
           "click",
           () => {
 
             const input =
-              option.querySelector("input");
+              option.querySelector(
+                "input"
+              );
+
 
             const questionName =
               input.name;
+
 
             document
               .querySelectorAll(
                 `input[name="${questionName}"]`
               )
-              .forEach((radio) => {
+              .forEach(
+                radio => {
 
-                radio
-                  .closest(".option")
-                  .classList.remove("selected");
+                  radio
+                    .closest(".option")
+                    .classList
+                    .remove("selected");
 
-              });
+                }
+              );
 
-            option.classList.add("selected");
 
-            input.checked = true;
+            option.classList.add(
+              "selected"
+            );
+
+
+            input.checked =
+              true;
+
 
             updateProgress();
 
           }
         );
 
-      });
+      }
+    );
+
+}
+
+
+
+async function loadQuiz(){
+
+  currentQuizId =
+    getQuizId();
+
+
+  if(!currentQuizId){
+
+    loading.textContent =
+      "Invalid quiz link.";
+
+    return;
 
   }
 
 
-  async function loadQuiz() {
+  try{
 
-    currentQuizId =
-      getQuizId();
+    const quizRef =
+      doc(
+        db,
+        "quizzes",
+        currentQuizId
+      );
 
-    if (!currentQuizId) {
+
+    const snapshot =
+      await getDoc(
+        quizRef
+      );
+
+
+    if(!snapshot.exists()){
 
       loading.textContent =
-        "Invalid quiz link.";
+        "Quiz not found.";
 
       return;
 
     }
 
-    try {
 
-      const quizRef =
-        doc(
-          db,
-          "quizzes",
-          currentQuizId
-        );
+    const quiz =
+      snapshot.data();
 
-      const snapshot =
-        await getDoc(quizRef);
 
-      if (!snapshot.exists()) {
-
-        loading.textContent =
-          "Quiz not found.";
-
-        return;
-
-      }
-
-      const quiz =
-        snapshot.data();
-
-      if (!quiz.published) {
-
-        loading.textContent =
-          "This quiz is not currently available.";
-
-        return;
-
-      }
-
-      currentQuiz = quiz;
-
-      const questions =
-        quiz.questions || [];
-
-      quizTitle.textContent =
-        quiz.title || "Quiz";
-
-      quizInfo.textContent =
-        `${quiz.subject || ""} • ${questions.length} Questions`;
-
-      renderQuestions(questions);
-
-      loading.style.display =
-        "none";
-
-      quizCard.style.display =
-        "block";
-
-      startTimer();
-
-    } catch (error) {
-
-      console.error(error);
+    if(!quiz.published){
 
       loading.textContent =
-        "Could not load quiz.";
+        "This quiz is not currently available.";
+
+      return;
 
     }
 
-  }
 
+    currentQuiz =
+      quiz;
 
-  async function submitQuiz(autoSubmit = false) {
-
-    if (quizSubmitted) return;
-
-    errorMessage.style.display =
-      "none";
-
-    const name =
-      studentName.value.trim();
-
-    if (!name) {
-
-      if (autoSubmit) {
-
-        studentName.value =
-          "Anonymous Student";
-
-      } else {
-
-        showError(
-          "Please enter your name before submitting."
-        );
-
-        studentName.focus();
-
-        return;
-
-      }
-
-    }
-
-    const finalName =
-      studentName.value.trim();
 
     const questions =
-      currentQuiz.questions || [];
-
-    let score = 0;
-
-    let answered = 0;
+      quiz.questions || [];
 
 
-    for (
-      let i = 0;
-      i < questions.length;
-      i++
-    ) {
+    quizTitle.textContent =
+      quiz.title || "Quiz";
 
-      const selected =
-        document.querySelector(
-          `input[name="question-${i}"]:checked`
+
+    quizInfo.textContent =
+      `${quiz.subject || ""} • ${questions.length} Questions`;
+
+
+    renderQuestions(
+      questions
+    );
+
+
+    /*
+      IMPORTANT:
+      Admin Panel থেকে durationMinutes নেওয়া হচ্ছে।
+
+      যদি Admin Panel-এ 1 Hour 30 Minutes
+      select করা হয়, তাহলে durationMinutes = 90।
+
+      তাই timer হবে:
+      90 × 60 = 5400 seconds
+    */
+
+
+    const durationMinutes =
+      Number(
+        quiz.durationMinutes
+      );
+
+
+    if(
+      Number.isFinite(
+        durationMinutes
+      ) &&
+      durationMinutes > 0
+    ){
+
+      timerSeconds =
+        Math.round(
+          durationMinutes * 60
         );
 
-      if (selected) {
+    }
+    else{
 
-        answered++;
-
-        const answer =
-          Number(selected.value);
-
-        if (
-          answer ===
-          Number(
-            questions[i].correctAnswer
-          )
-        ) {
-
-          score++;
-
-        }
-
-      } else if (!autoSubmit) {
-
-        showError(
-          `Please answer Question ${i + 1}.`
-        );
-
-        return;
-
-      }
+      // পুরোনো quiz হলে 30 মিনিট
+      timerSeconds =
+        30 * 60;
 
     }
 
 
-    const total =
-      questions.length;
-
-    const wrong =
-      total - score;
-
-    const percentage =
-      total === 0
-        ? 0
-        : Math.round(
-            (score / total) * 100
-          );
+    loading.style.display =
+      "none";
 
 
-    quizSubmitted = true;
-
-    clearInterval(timerInterval);
-
-    submitButton.disabled = true;
-
-    submitButton.textContent =
-      "Submitting...";
+    quizCard.style.display =
+      "block";
 
 
-    try {
+    startTimer();
 
-      const scoreRef =
-        doc(
-          collection(db, "scores")
-        );
+  }
+  catch(error){
 
-      await setDoc(
-        scoreRef,
-        {
+    console.error(error);
 
-          studentName:
-            finalName,
+    loading.textContent =
+      "Could not load quiz.";
 
-          quizId:
-            currentQuizId,
+  }
 
-          quizTitle:
-            currentQuiz.title || "",
-
-          score:
-            score,
-
-          total:
-            total,
-
-          percentage:
-            percentage,
-
-          answered:
-            answered,
-
-          submittedAt:
-            new Date().toISOString()
-
-        }
-      );
+}
 
 
-      quizCard.style.display =
-        "none";
 
-      resultCard.style.display =
-        "block";
+async function submitQuiz(
+  autoSubmit = false
+){
 
-
-      resultScore.textContent =
-        `${score}/${total}`;
-
-      resultPercentage.textContent =
-        `${percentage}%`;
-
-      resultStudent.textContent =
-        `Submitted by ${finalName}`;
-
-      correctCount.textContent =
-        score;
-
-      wrongCount.textContent =
-        wrong;
-
-      totalCount.textContent =
-        total;
+  if(quizSubmitted)
+    return;
 
 
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
+  errorMessage.style.display =
+    "none";
 
 
-    } catch (error) {
+  const name =
+    studentName.value.trim();
 
-      console.error(error);
 
-      quizSubmitted = false;
+  if(!name){
 
-      submitButton.disabled =
-        false;
+    if(autoSubmit){
 
-      submitButton.textContent =
-        "Submit Quiz";
+      studentName.value =
+        "Anonymous Student";
+
+    }
+    else{
 
       showError(
-        "Could not submit your result. Please try again."
+        "Please enter your name before submitting."
       );
+
+      studentName.focus();
+
+      return;
 
     }
 
   }
 
 
-  submitButton.addEventListener(
-    "click",
-    () => {
-      submitQuiz(false);
+  const finalName =
+    studentName.value.trim();
+
+
+  const questions =
+    currentQuiz.questions || [];
+
+
+  let score =
+    0;
+
+
+  let answered =
+    0;
+
+
+  for(
+    let i = 0;
+    i < questions.length;
+    i++
+  ){
+
+    const selected =
+      document.querySelector(
+        `input[name="question-${i}"]:checked`
+      );
+
+
+    if(selected){
+
+      answered++;
+
+
+      const answer =
+        Number(
+          selected.value
+        );
+
+
+      if(
+        answer ===
+        Number(
+          questions[i].correctAnswer
+        )
+      ){
+
+        score++;
+
+      }
+
     }
+    else if(!autoSubmit){
+
+      showError(
+        `Please answer Question ${i + 1}.`
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  const total =
+    questions.length;
+
+
+  const wrong =
+    total - score;
+
+
+  const percentage =
+    total === 0
+      ? 0
+      : Math.round(
+          (score / total) * 100
+        );
+
+
+  quizSubmitted =
+    true;
+
+
+  clearInterval(
+    timerInterval
   );
 
 
-  loadQuiz();
+  submitButton.disabled =
+    true;
+
+
+  submitButton.textContent =
+    "Submitting...";
+
+
+  try{
+
+    const scoreRef =
+      doc(
+        collection(
+          db,
+          "scores"
+        )
+      );
+
+
+    await setDoc(
+      scoreRef,
+      {
+
+        studentName:
+          finalName,
+
+        quizId:
+          currentQuizId,
+
+        quizTitle:
+          currentQuiz.title || "",
+
+        score:
+          score,
+
+        total:
+          total,
+
+        percentage:
+          percentage,
+
+        answered:
+          answered,
+
+        submittedAt:
+          new Date().toISOString()
+
+      }
+    );
+
+
+    quizCard.style.display =
+      "none";
+
+
+    resultCard.style.display =
+      "block";
+
+
+    resultScore.textContent =
+      `${score}/${total}`;
+
+
+    resultPercentage.textContent =
+      `${percentage}%`;
+
+
+    resultStudent.textContent =
+      `Submitted by ${finalName}`;
+
+
+    correctCount.textContent =
+      score;
+
+
+    wrongCount.textContent =
+      wrong;
+
+
+    totalCount.textContent =
+      total;
+
+
+    window.scrollTo({
+
+      top:0,
+
+      behavior:"smooth"
+
+    });
+
+  }
+  catch(error){
+
+    console.error(error);
+
+
+    quizSubmitted =
+      false;
+
+
+    submitButton.disabled =
+      false;
+
+
+    submitButton.textContent =
+      "Submit Quiz";
+
+
+    showError(
+      "Could not submit your result. Please try again."
+    );
+
+  }
+
+}
+
+
+
+submitButton.addEventListener(
+  "click",
+  () => {
+
+    submitQuiz(false);
+
+  }
+);
+
+
+loadQuiz();
 
 </script>
 
