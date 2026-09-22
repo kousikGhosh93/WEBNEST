@@ -78,6 +78,8 @@
       text-decoration: none;
       font-weight: 700;
       margin: 5px;
+      border: none;
+      cursor: pointer;
     }
 
     .primary {
@@ -126,6 +128,26 @@
       line-height: 1.6;
     }
 
+    .quiz-meta {
+      color: #64748b;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      color: #64748b;
+      padding: 20px;
+      grid-column: 1 / -1;
+    }
+
+    .empty {
+      text-align: center;
+      color: #64748b;
+      padding: 20px;
+      grid-column: 1 / -1;
+    }
+
     footer {
       text-align: center;
       padding: 30px;
@@ -134,6 +156,7 @@
     }
 
     @media (max-width: 600px) {
+
       nav {
         display: none;
       }
@@ -141,6 +164,7 @@
       header {
         padding: 16px 20px;
       }
+
     }
   </style>
 </head>
@@ -148,22 +172,32 @@
 <body>
 
   <header>
-    <div class="logo">WebNest</div>
 
-   <nav>
-  <a href="#home">Home</a>
-  <a href="#services">Services</a>
-  <a href="#quizzes">Quizzes</a>
-  <a href="#contact">Contact</a>
-  <a href="login.html">Login</a>
-  <a href="signup.html">Sign Up</a>
-</nav>
+    <div class="logo">
+      WebNest
+    </div>
+
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#services">Services</a>
+      <a href="#quizzes">Quizzes</a>
+      <a href="#contact">Contact</a>
+      <a href="login.html">Login</a>
+      <a href="signup.html">Sign Up</a>
+    </nav>
+
   </header>
+
 
   <main>
 
-    <section class="hero" id="home">
-      <h1>Welcome to <span>WebNest</span></h1>
+    <section
+      class="hero"
+      id="home">
+
+      <h1>
+        Welcome to <span>WebNest</span>
+      </h1>
 
       <p>
         Websites, interactive quizzes and digital solutions —
@@ -171,115 +205,270 @@
       </p>
 
       <div class="buttons">
-        <a href="#quizzes" class="btn primary">Explore Quizzes</a>
-        <a href="#contact" class="btn secondary">Contact</a>
+
+        <a
+          href="#quizzes"
+          class="btn primary">
+          Explore Quizzes
+        </a>
+
+        <a
+          href="#contact"
+          class="btn secondary">
+          Contact
+        </a>
+
       </div>
+
     </section>
 
+
     <section id="services">
-      <h2 class="section-title">What We Do</h2>
+
+      <h2 class="section-title">
+        What We Do
+      </h2>
 
       <div class="cards">
 
         <div class="card">
+
           <h3>💻 Websites</h3>
+
           <p>
             Simple and modern websites for tuition,
             coaching and small businesses.
           </p>
+
         </div>
 
+
         <div class="card">
+
           <h3>📚 MCQ Quizzes</h3>
+
           <p>
             Interactive quizzes where students can answer
             questions and check their scores.
           </p>
+
         </div>
 
+
         <div class="card">
+
           <h3>🎨 Digital Design</h3>
+
           <p>
             Clean posters, promotional graphics and
             social-media designs.
           </p>
+
         </div>
 
       </div>
+
     </section>
+
 
     <section id="quizzes">
-      <h2 class="section-title">Featured Quizzes</h2>
 
-      <div class="cards">
+      <h2 class="section-title">
+        Featured Quizzes
+      </h2>
 
-        <div class="card">
-          <h3>Biology Quiz</h3>
-          <p>Class 11 Biology MCQ practice set.</p>
+      <div
+        class="cards"
+        id="quizContainer">
 
-          <div class="buttons">
-            <a href="#" class="btn primary">Start Quiz</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Physics Quiz</h3>
-          <p>Practice Physics questions online.</p>
-
-          <div class="buttons">
-            <a href="#" class="btn primary">Start Quiz</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Chemistry Quiz</h3>
-          <p>Interactive Chemistry MCQ practice.</p>
-
-          <div class="buttons">
-            <a href="#" class="btn primary">Start Quiz</a>
-          </div>
+        <div class="loading">
+          Loading quizzes...
         </div>
 
       </div>
+
     </section>
 
+
     <section id="contact">
-      <h2 class="section-title">Contact WebNest</h2>
+
+      <h2 class="section-title">
+        Contact WebNest
+      </h2>
 
       <div
         class="card"
-        style="max-width:600px;margin:auto;text-align:center;"
-      >
+        style="max-width:600px;margin:auto;text-align:center;">
+
         <p>
           Interested in a website, quiz or digital project?
           Contact WebNest to discuss your idea.
         </p>
 
         <div class="buttons">
+
           <a
             href="mailto:your-email@example.com"
-            class="btn primary"
-          >
+            class="btn primary">
             Email Us
           </a>
+
         </div>
+
       </div>
+
     </section>
 
   </main>
+
 
   <footer>
     © 2026 WebNest. All rights reserved.
   </footer>
 
-  <!-- Firebase connection -->
-  <script type="module">
-    import { auth, db } from "./firebase.js";
 
-    window.webnestFirebase = {
-      auth,
+  <script type="module">
+
+    import {
+      collection,
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    import {
       db
-    };
+    } from "./firebase.js";
+
+
+    const quizContainer =
+      document.getElementById("quizContainer");
+
+
+    function escapeHtml(value) {
+
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+    async function loadPublishedQuizzes() {
+
+      try {
+
+        const quizzesQuery =
+          query(
+            collection(db, "quizzes"),
+            where("published", "==", true)
+          );
+
+
+        const snapshot =
+          await getDocs(quizzesQuery);
+
+
+        if (snapshot.empty) {
+
+          quizContainer.innerHTML = `
+            <div class="empty">
+              No quizzes published yet.
+            </div>
+          `;
+
+          return;
+
+        }
+
+
+        quizContainer.innerHTML = "";
+
+
+        snapshot.forEach((item) => {
+
+          const quiz =
+            item.data();
+
+
+          const questionCount =
+            (quiz.questions || []).length;
+
+
+          const card =
+            document.createElement("div");
+
+          card.className = "card";
+
+
+          card.innerHTML = `
+
+            <h3>
+              ${escapeHtml(quiz.title)}
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                quiz.description ||
+                "Interactive MCQ practice quiz."
+              )}
+            </p>
+
+            <div class="quiz-meta">
+              Subject:
+              ${escapeHtml(quiz.subject)}
+              <br>
+              Questions:
+              ${questionCount}
+            </div>
+
+            <div class="buttons">
+
+              <a
+                href="quiz.html?id=${encodeURIComponent(item.id)}"
+                class="btn primary">
+                Start Quiz
+              </a>
+
+            </div>
+
+          `;
+
+
+          quizContainer.appendChild(card);
+
+        });
+
+
+      } catch (error) {
+
+        console.error(error);
+
+
+        quizContainer.innerHTML = `
+
+          <div class="empty">
+
+            Could not load quizzes.
+
+            <br><br>
+
+            Please check Firebase settings.
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+
+    loadPublishedQuizzes();
+
   </script>
 
 </body>
