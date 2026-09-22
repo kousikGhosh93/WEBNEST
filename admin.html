@@ -279,13 +279,10 @@
       color: #334155;
     }
 
-    .empty {
-      color: #64748b;
-      padding: 15px 0;
-    }
-
+    .empty,
     .loading {
       color: #64748b;
+      padding: 15px 0;
     }
 
     .request {
@@ -307,8 +304,39 @@
       word-break: break-word;
     }
 
-    @media (max-width: 700px) {
+    .scores-table-wrapper {
+      overflow-x: auto;
+    }
 
+    .scores-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .scores-table th,
+    .scores-table td {
+      padding: 13px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .scores-table th {
+      background: #f1f5f9;
+      font-size: 14px;
+    }
+
+    .scores-table td {
+      font-size: 14px;
+    }
+
+    .score-percentage {
+      font-weight: 800;
+      color: #15803d;
+    }
+
+    @media (max-width: 700px) {
       header {
         padding: 16px 20px;
       }
@@ -329,6 +357,11 @@
       .option-grid {
         grid-template-columns: 1fr;
       }
+
+      .scores-table th,
+      .scores-table td {
+        padding: 10px 8px;
+      }
     }
   </style>
 </head>
@@ -336,50 +369,31 @@
 <body>
 
 <header>
-
   <div class="logo">
     WebNest
   </div>
 
   <div class="header-right">
+    <span class="user-email" id="userEmail"></span>
 
-    <span
-      class="user-email"
-      id="userEmail">
-    </span>
-
-    <button
-      class="logout"
-      id="logoutButton">
+    <button class="logout" id="logoutButton">
       Logout
     </button>
-
   </div>
-
 </header>
-
 
 <main>
 
   <div class="welcome">
-
     <h1>Admin Panel</h1>
-
     <p>
-      Manage WebNest quizzes and users from here.
+      Manage WebNest quizzes, users and student scores from here.
     </p>
-
   </div>
 
-
-  <div
-    class="message"
-    id="message">
-  </div>
-
+  <div class="message" id="message"></div>
 
   <div class="grid">
-
 
     <!-- ADMIN REQUESTS -->
 
@@ -392,11 +406,9 @@
       </p>
 
       <div id="requests">
-
         <div class="loading">
           Loading requests...
         </div>
-
       </div>
 
     </div>
@@ -412,26 +424,18 @@
         Create and manage your quizzes.
       </p>
 
-
-      <button
-        class="primary"
-        id="newQuizButton">
+      <button class="primary" id="newQuizButton">
         + Create New Quiz
       </button>
 
 
       <!-- QUIZ FORM -->
 
-      <div
-        class="form-section"
-        id="quizFormSection">
+      <div class="form-section" id="quizFormSection">
 
-        <h3
-          class="form-title"
-          id="formTitle">
+        <h3 class="form-title" id="formTitle">
           Create New Quiz
         </h3>
-
 
         <label for="quizTitle">
           Quiz Title
@@ -440,8 +444,8 @@
         <input
           id="quizTitle"
           type="text"
-          placeholder="Example: Class 11 Biology MCQ">
-
+          placeholder="Example: Class 11 Biology MCQ"
+        >
 
         <label for="quizSubject">
           Subject
@@ -450,8 +454,8 @@
         <input
           id="quizSubject"
           type="text"
-          placeholder="Example: Biology">
-
+          placeholder="Example: Biology"
+        >
 
         <label for="quizDescription">
           Description
@@ -459,32 +463,31 @@
 
         <textarea
           id="quizDescription"
-          placeholder="Short description of this quiz">
-        </textarea>
+          placeholder="Short description of this quiz"
+        ></textarea>
 
-
-        <div id="questionsContainer">
-        </div>
-
+        <div id="questionsContainer"></div>
 
         <button
           class="primary"
-          id="addQuestionButton">
+          id="addQuestionButton"
+        >
           + Add Question
         </button>
-
 
         <div class="form-buttons">
 
           <button
             class="primary"
-            id="saveQuizButton">
+            id="saveQuizButton"
+          >
             Save Quiz
           </button>
 
           <button
             class="cancel"
-            id="cancelQuizButton">
+            id="cancelQuizButton"
+          >
             Cancel
           </button>
 
@@ -497,12 +500,11 @@
 
       <div
         style="margin-top:25px;"
-        id="quizList">
-
+        id="quizList"
+      >
         <div class="loading">
           Loading quizzes...
         </div>
-
       </div>
 
     </div>
@@ -515,15 +517,38 @@
       <h2>📊 Student Scores</h2>
 
       <p class="description">
-        Student results will be available here.
+        View all submitted quiz results.
       </p>
 
-      <div class="empty">
-        Score management will be added next.
+      <div id="scoresMessage" class="loading">
+        Loading scores...
+      </div>
+
+      <div
+        id="scoresTableWrapper"
+        class="scores-table-wrapper"
+        style="display:none;"
+      >
+
+        <table class="scores-table">
+
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Quiz</th>
+              <th>Score</th>
+              <th>Percentage</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+
+          <tbody id="scoresBody"></tbody>
+
+        </table>
+
       </div>
 
     </div>
-
 
   </div>
 
@@ -600,6 +625,15 @@
   const formTitle =
     document.getElementById("formTitle");
 
+  const scoresMessage =
+    document.getElementById("scoresMessage");
+
+  const scoresTableWrapper =
+    document.getElementById("scoresTableWrapper");
+
+  const scoresBody =
+    document.getElementById("scoresBody");
+
 
   let currentUserData = null;
 
@@ -615,9 +649,7 @@
     message.style.display = "block";
 
     setTimeout(() => {
-
       message.style.display = "none";
-
     }, 3500);
 
   }
@@ -663,6 +695,7 @@
         "index.html";
 
       return false;
+
     }
 
 
@@ -675,6 +708,7 @@
         "index.html";
 
       return false;
+
     }
 
 
@@ -707,7 +741,9 @@
     try {
 
       const snapshot =
-        await getDocs(collection(db, "users"));
+        await getDocs(
+          collection(db, "users")
+        );
 
       const pending = [];
 
@@ -763,13 +799,15 @@
 
             <button
               class="publish"
-              data-user="${person.id}">
+              data-user="${person.id}"
+            >
               Approve
             </button>
 
             <button
               class="delete"
-              data-user="${person.id}">
+              data-user="${person.id}"
+            >
               Reject
             </button>
 
@@ -871,7 +909,8 @@
 
         <button
           type="button"
-          class="remove-question">
+          class="remove-question"
+        >
           Remove
         </button>
 
@@ -884,7 +923,8 @@
 
       <textarea
         class="question-text"
-        placeholder="Write the question here...">${escapeHtml(data?.question || "")}</textarea>
+        placeholder="Write the question here..."
+      >${escapeHtml(data?.question || "")}</textarea>
 
 
       <div class="option-grid">
@@ -899,7 +939,8 @@
             class="option-a"
             type="text"
             value="${escapeHtml(data?.options?.[0] || "")}"
-            placeholder="Option A">
+            placeholder="Option A"
+          >
 
         </div>
 
@@ -914,7 +955,8 @@
             class="option-b"
             type="text"
             value="${escapeHtml(data?.options?.[1] || "")}"
-            placeholder="Option B">
+            placeholder="Option B"
+          >
 
         </div>
 
@@ -929,7 +971,8 @@
             class="option-c"
             type="text"
             value="${escapeHtml(data?.options?.[2] || "")}"
-            placeholder="Option C">
+            placeholder="Option C"
+          >
 
         </div>
 
@@ -944,7 +987,8 @@
             class="option-d"
             type="text"
             value="${escapeHtml(data?.options?.[3] || "")}"
-            placeholder="Option D">
+            placeholder="Option D"
+          >
 
         </div>
 
@@ -957,23 +1001,31 @@
 
       <select class="correct-answer">
 
-        <option value="0"
-          ${data?.correctAnswer === 0 ? "selected" : ""}>
+        <option
+          value="0"
+          ${data?.correctAnswer === 0 ? "selected" : ""}
+        >
           Option A
         </option>
 
-        <option value="1"
-          ${data?.correctAnswer === 1 ? "selected" : ""}>
+        <option
+          value="1"
+          ${data?.correctAnswer === 1 ? "selected" : ""}
+        >
           Option B
         </option>
 
-        <option value="2"
-          ${data?.correctAnswer === 2 ? "selected" : ""}>
+        <option
+          value="2"
+          ${data?.correctAnswer === 2 ? "selected" : ""}
+        >
           Option C
         </option>
 
-        <option value="3"
-          ${data?.correctAnswer === 3 ? "selected" : ""}>
+        <option
+          value="3"
+          ${data?.correctAnswer === 3 ? "selected" : ""}
+        >
           Option D
         </option>
 
@@ -1064,13 +1116,9 @@
 
 
       questions.push({
-
         question,
-
         options,
-
         correctAnswer
-
       });
 
     });
@@ -1136,6 +1184,7 @@
 
       addQuestion();
 
+
       window.scrollTo({
         top: quizFormSection.offsetTop - 100,
         behavior: "smooth"
@@ -1148,9 +1197,7 @@
   addQuestionButton.addEventListener(
     "click",
     () => {
-
       addQuestion();
-
     }
   );
 
@@ -1158,9 +1205,7 @@
   cancelQuizButton.addEventListener(
     "click",
     () => {
-
       resetQuizForm();
-
     }
   );
 
@@ -1393,7 +1438,8 @@
                 quiz.published
                   ? "published"
                   : "draft"
-              }">
+              }"
+            >
 
               ${
                 quiz.published
@@ -1410,7 +1456,8 @@
 
             <button
               class="edit"
-              data-edit="${item.id}">
+              data-edit="${item.id}"
+            >
               Edit
             </button>
 
@@ -1420,7 +1467,8 @@
                   ? "unpublish"
                   : "publish"
               }"
-              data-publish="${item.id}">
+              data-publish="${item.id}"
+            >
 
               ${
                 quiz.published
@@ -1432,7 +1480,8 @@
 
             <button
               class="delete"
-              data-delete="${item.id}">
+              data-delete="${item.id}"
+            >
               Delete
             </button>
 
@@ -1452,9 +1501,10 @@
 
           button.addEventListener(
             "click",
-            () => editQuiz(
-              button.dataset.edit
-            )
+            () =>
+              editQuiz(
+                button.dataset.edit
+              )
           );
 
         });
@@ -1466,9 +1516,10 @@
 
           button.addEventListener(
             "click",
-            () => togglePublish(
-              button.dataset.publish
-            )
+            () =>
+              togglePublish(
+                button.dataset.publish
+              )
           );
 
         });
@@ -1480,9 +1531,10 @@
 
           button.addEventListener(
             "click",
-            () => deleteQuiz(
-              button.dataset.delete
-            )
+            () =>
+              deleteQuiz(
+                button.dataset.delete
+              )
           );
 
         });
@@ -1494,6 +1546,157 @@
 
       quizList.innerHTML =
         '<div class="empty">Could not load quizzes. Firestore rules may need updating.</div>';
+
+    }
+
+  }
+
+
+  async function loadScores() {
+
+    scoresMessage.textContent =
+      "Loading scores...";
+
+    scoresMessage.style.display =
+      "block";
+
+    scoresTableWrapper.style.display =
+      "none";
+
+    scoresBody.innerHTML = "";
+
+
+    try {
+
+      const snapshot =
+        await getDocs(
+          collection(db, "scores")
+        );
+
+
+      if (snapshot.empty) {
+
+        scoresMessage.textContent =
+          "No quiz scores yet.";
+
+        return;
+
+      }
+
+
+      const scores = [];
+
+
+      snapshot.forEach((item) => {
+
+        scores.push({
+          id: item.id,
+          ...item.data()
+        });
+
+      });
+
+
+      scores.sort((a, b) => {
+
+        const dateA =
+          new Date(
+            a.submittedAt || 0
+          ).getTime();
+
+        const dateB =
+          new Date(
+            b.submittedAt || 0
+          ).getTime();
+
+        return dateB - dateA;
+
+      });
+
+
+      scores.forEach((score) => {
+
+        const row =
+          document.createElement("tr");
+
+
+        let submitted =
+          "-";
+
+
+        if (score.submittedAt) {
+
+          const date =
+            new Date(
+              score.submittedAt
+            );
+
+          if (!Number.isNaN(date.getTime())) {
+
+            submitted =
+              date.toLocaleString();
+
+          }
+
+        }
+
+
+        row.innerHTML = `
+
+          <td>
+            ${escapeHtml(
+              score.studentName || "Unknown"
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              score.quizTitle || "Unknown Quiz"
+            )}
+          </td>
+
+          <td>
+            ${Number(score.score || 0)}
+            /
+            ${Number(score.total || 0)}
+          </td>
+
+          <td class="score-percentage">
+            ${Number(score.percentage || 0)}%
+          </td>
+
+          <td>
+            ${escapeHtml(submitted)}
+          </td>
+
+        `;
+
+
+        scoresBody.appendChild(row);
+
+      });
+
+
+      scoresMessage.style.display =
+        "none";
+
+      scoresTableWrapper.style.display =
+        "block";
+
+
+    } catch (error) {
+
+      console.error(
+        "Score loading error:",
+        error
+      );
+
+
+      scoresMessage.textContent =
+        "Could not load scores. Check Firestore Rules.";
+
+      scoresMessage.style.display =
+        "block";
 
     }
 
@@ -1610,7 +1813,8 @@
       await updateDoc(
         doc(db, "quizzes", id),
         {
-          published: !quiz.published,
+          published:
+            !quiz.published,
 
           updatedAt:
             new Date().toISOString(),
@@ -1716,6 +1920,8 @@
 
       await loadQuizzes();
 
+      await loadScores();
+
     }
   );
 
@@ -1733,141 +1939,6 @@
   );
 
 </script>
-<section id="scoresSection" style="padding:30px; max-width:1100px; margin:auto;">
 
-  <h2 style="margin-bottom:20px;">📊 Quiz Scores</h2>
-
-  <div id="scoresMessage">
-    Loading scores...
-  </div>
-
-  <div style="overflow-x:auto;">
-
-    <table id="scoresTable"
-           style="width:100%; border-collapse:collapse; display:none;">
-
-      <thead>
-        <tr style="background:#f1f5f9;">
-          <th style="padding:12px; text-align:left;">Student</th>
-          <th style="padding:12px; text-align:left;">Quiz</th>
-          <th style="padding:12px; text-align:left;">Score</th>
-          <th style="padding:12px; text-align:left;">Percentage</th>
-          <th style="padding:12px; text-align:left;">Submitted</th>
-        </tr>
-      </thead>
-
-      <tbody id="scoresBody"></tbody>
-
-    </table>
-
-  </div>
-
-</section>
-
-<script type="module">
-
-  import {
-    collection,
-    getDocs
-  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-  import { db } from "./firebase.js";
-
-
-  const scoresMessage =
-    document.getElementById("scoresMessage");
-
-  const scoresTable =
-    document.getElementById("scoresTable");
-
-  const scoresBody =
-    document.getElementById("scoresBody");
-
-
-  async function loadScores() {
-
-    try {
-
-      const snapshot =
-        await getDocs(
-          collection(db, "scores")
-        );
-
-
-      if (snapshot.empty) {
-
-        scoresMessage.textContent =
-          "No quiz scores yet.";
-
-        return;
-
-      }
-
-
-      scoresBody.innerHTML = "";
-
-
-      snapshot.forEach((doc) => {
-
-        const score = doc.data();
-
-
-        const row =
-          document.createElement("tr");
-
-
-        row.innerHTML = `
-
-          <td style="padding:12px; border-bottom:1px solid #e2e8f0;">
-            ${score.studentName || "Unknown"}
-          </td>
-
-          <td style="padding:12px; border-bottom:1px solid #e2e8f0;">
-            ${score.quizTitle || "Unknown Quiz"}
-          </td>
-
-          <td style="padding:12px; border-bottom:1px solid #e2e8f0;">
-            ${score.score || 0} / ${score.total || 0}
-          </td>
-
-          <td style="padding:12px; border-bottom:1px solid #e2e8f0;">
-            ${score.percentage || 0}%
-          </td>
-
-          <td style="padding:12px; border-bottom:1px solid #e2e8f0;">
-            ${
-              score.submittedAt
-                ? new Date(score.submittedAt).toLocaleString()
-                : "-"
-            }
-          </td>
-
-        `;
-
-
-        scoresBody.appendChild(row);
-
-      });
-
-
-      scoresMessage.style.display = "none";
-      scoresTable.style.display = "table";
-
-
-    } catch (error) {
-
-      console.error(error);
-
-      scoresMessage.textContent =
-        "Could not load scores: " + error.message;
-
-    }
-
-  }
-
-
-  loadScores();
-
-</script>
 </body>
 </html>
