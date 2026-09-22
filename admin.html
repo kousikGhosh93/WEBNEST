@@ -241,12 +241,6 @@ textarea{
   resize:vertical;
 }
 
-/* TIMER */
-
-.timer-settings{
-  margin-bottom:8px;
-}
-
 .timer-select{
   width:100%;
   padding:13px;
@@ -256,11 +250,6 @@ textarea{
   background:white;
   cursor:pointer;
   margin-bottom:10px;
-}
-
-.timer-select:focus{
-  border-color:#2563eb;
-  box-shadow:0 0 0 3px rgba(37,99,235,.1);
 }
 
 .timer-note{
@@ -461,6 +450,7 @@ textarea{
 
     </div>
 
+
     <!-- QUIZ MANAGEMENT -->
 
     <div class="card">
@@ -478,6 +468,7 @@ textarea{
         id="newQuizButton">
         + Create New Quiz
       </button>
+
 
       <!-- QUIZ FORM -->
 
@@ -520,76 +511,71 @@ textarea{
           placeholder="Short description of this quiz">
         </textarea>
 
-        <!-- TIMER SETTINGS -->
 
         <label for="quizDuration">
           ⏱️ Quiz Time
         </label>
 
-        <div class="timer-settings">
+        <select
+          id="quizDuration"
+          class="timer-select">
 
-          <select
-            id="quizDuration"
-            class="timer-select">
+          <option value="15">
+            15 Minutes
+          </option>
 
-            <option value="15">
-              15 Minutes
-            </option>
+          <option value="30" selected>
+            30 Minutes
+          </option>
 
-            <option value="30" selected>
-              30 Minutes
-            </option>
+          <option value="45">
+            45 Minutes
+          </option>
 
-            <option value="45">
-              45 Minutes
-            </option>
+          <option value="60">
+            1 Hour
+          </option>
 
-            <option value="60">
-              1 Hour
-            </option>
+          <option value="75">
+            1 Hour 15 Minutes
+          </option>
 
-            <option value="75">
-              1 Hour 15 Minutes
-            </option>
+          <option value="90">
+            1 Hour 30 Minutes
+          </option>
 
-            <option value="90">
-              1 Hour 30 Minutes
-            </option>
+          <option value="105">
+            1 Hour 45 Minutes
+          </option>
 
-            <option value="105">
-              1 Hour 45 Minutes
-            </option>
+          <option value="120">
+            2 Hours
+          </option>
 
-            <option value="120">
-              2 Hours
-            </option>
+          <option value="150">
+            2 Hours 30 Minutes
+          </option>
 
-            <option value="150">
-              2 Hours 30 Minutes
-            </option>
+          <option value="180">
+            3 Hours
+          </option>
 
-            <option value="180">
-              3 Hours
-            </option>
-
-          </select>
-
-        </div>
+        </select>
 
         <p class="timer-note">
           Select the time you want to give students.
-          For example, 1 Hour 30 Minutes = 01:30:00.
         </p>
 
-        <div
-          id="questionsContainer">
-        </div>
+
+        <div id="questionsContainer"></div>
+
 
         <button
           class="primary"
           id="addQuestionButton">
           + Add Question
         </button>
+
 
         <div class="form-buttons">
 
@@ -609,6 +595,7 @@ textarea{
 
       </div>
 
+
       <!-- QUIZ LIST -->
 
       <div
@@ -622,6 +609,7 @@ textarea{
       </div>
 
     </div>
+
 
     <!-- STUDENT SCORES -->
 
@@ -652,25 +640,11 @@ textarea{
 
             <tr>
 
-              <th>
-                Student
-              </th>
-
-              <th>
-                Quiz
-              </th>
-
-              <th>
-                Score
-              </th>
-
-              <th>
-                Percentage
-              </th>
-
-              <th>
-                Submitted
-              </th>
+              <th>Student</th>
+              <th>Quiz</th>
+              <th>Score</th>
+              <th>Percentage</th>
+              <th>Submitted</th>
 
             </tr>
 
@@ -690,6 +664,7 @@ textarea{
 
 </main>
 
+
 <script type="module">
 
 import {
@@ -697,6 +672,7 @@ import {
   signOut
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 
 import {
   collection,
@@ -708,6 +684,7 @@ import {
   deleteDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
 import {
   auth,
@@ -781,17 +758,12 @@ let questionNumber = 0;
 
 function showMessage(text){
 
-  message.textContent =
-    text;
+  message.textContent = text;
 
-  message.style.display =
-    "block";
+  message.style.display = "block";
 
   setTimeout(() => {
-
-    message.style.display =
-      "none";
-
+    message.style.display = "none";
   },3500);
 
 }
@@ -800,7 +772,6 @@ function showMessage(text){
 function escapeHtml(value){
 
   return String(value ?? "")
-
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
@@ -813,11 +784,7 @@ function escapeHtml(value){
 async function getCurrentUserData(user){
 
   const userRef =
-    doc(
-      db,
-      "users",
-      user.uid
-    );
+    doc(db,"users",user.uid);
 
   const snapshot =
     await getDoc(userRef);
@@ -857,22 +824,23 @@ async function checkAccess(user){
 
   }
 
-  currentUserData =
-    data;
+  currentUserData = data;
 
   return true;
 
 }
 
 
+/* =========================
+   ADMIN REQUESTS
+========================= */
+
 async function loadRequests(){
 
   if(!currentUserData)
     return;
 
-  if(
-    currentUserData.role !== "owner"
-  ){
+  if(currentUserData.role !== "owner"){
 
     requestsContainer.innerHTML =
       '<div class="empty">Only the Owner can approve new admins.</div>';
@@ -895,8 +863,7 @@ async function loadRequests(){
 
     snapshot.forEach(item => {
 
-      const data =
-        item.data();
+      const data = item.data();
 
       if(data.role === "pending"){
 
@@ -925,15 +892,13 @@ async function loadRequests(){
       const box =
         document.createElement("div");
 
-      box.className =
-        "request";
+      box.className = "request";
 
       box.innerHTML = `
 
         <div class="request-name">
           ${escapeHtml(
-            person.name ||
-            "Unknown User"
+            person.name || "Unknown User"
           )}
         </div>
 
@@ -958,12 +923,12 @@ async function loadRequests(){
           </button>
 
         </div>
-
       `;
 
       requestsContainer.appendChild(box);
 
     });
+
 
     requestsContainer
       .querySelectorAll("[data-user]")
@@ -977,20 +942,14 @@ async function loadRequests(){
               button.dataset.user;
 
             const newRole =
-              button.classList.contains(
-                "publish"
-              )
-              ? "admin"
-              : "rejected";
+              button.classList.contains("publish")
+                ? "admin"
+                : "rejected";
 
             try{
 
               await updateDoc(
-                doc(
-                  db,
-                  "users",
-                  id
-                ),
+                doc(db,"users",id),
                 {
                   role:newRole
                 }
@@ -1033,6 +992,10 @@ async function loadRequests(){
 }
 
 
+/* =========================
+   QUESTIONS
+========================= */
+
 function addQuestion(data = null){
 
   questionNumber++;
@@ -1059,6 +1022,7 @@ function addQuestion(data = null){
 
     </div>
 
+
     <label>
       Question
     </label>
@@ -1070,13 +1034,12 @@ function addQuestion(data = null){
       data?.question || ""
     )}</textarea>
 
+
     <div class="option-grid">
 
       <div>
 
-        <label>
-          Option A
-        </label>
+        <label>Option A</label>
 
         <input
           class="option-a"
@@ -1089,11 +1052,10 @@ function addQuestion(data = null){
 
       </div>
 
+
       <div>
 
-        <label>
-          Option B
-        </label>
+        <label>Option B</label>
 
         <input
           class="option-b"
@@ -1106,11 +1068,10 @@ function addQuestion(data = null){
 
       </div>
 
+
       <div>
 
-        <label>
-          Option C
-        </label>
+        <label>Option C</label>
 
         <input
           class="option-c"
@@ -1123,11 +1084,10 @@ function addQuestion(data = null){
 
       </div>
 
+
       <div>
 
-        <label>
-          Option D
-        </label>
+        <label>Option D</label>
 
         <input
           class="option-d"
@@ -1142,6 +1102,7 @@ function addQuestion(data = null){
 
     </div>
 
+
     <label>
       Correct Answer
     </label>
@@ -1150,33 +1111,25 @@ function addQuestion(data = null){
 
       <option
         value="0"
-        ${Number(data?.correctAnswer) === 0
-          ? "selected"
-          : ""}>
+        ${Number(data?.correctAnswer) === 0 ? "selected" : ""}>
         Option A
       </option>
 
       <option
         value="1"
-        ${Number(data?.correctAnswer) === 1
-          ? "selected"
-          : ""}>
+        ${Number(data?.correctAnswer) === 1 ? "selected" : ""}>
         Option B
       </option>
 
       <option
         value="2"
-        ${Number(data?.correctAnswer) === 2
-          ? "selected"
-          : ""}>
+        ${Number(data?.correctAnswer) === 2 ? "selected" : ""}>
         Option C
       </option>
 
       <option
         value="3"
-        ${Number(data?.correctAnswer) === 3
-          ? "selected"
-          : ""}>
+        ${Number(data?.correctAnswer) === 3 ? "selected" : ""}>
         Option D
       </option>
 
@@ -1184,10 +1137,9 @@ function addQuestion(data = null){
 
   `;
 
+
   box
-    .querySelector(
-      ".remove-question"
-    )
+    .querySelector(".remove-question")
     .addEventListener(
       "click",
       () => {
@@ -1199,8 +1151,8 @@ function addQuestion(data = null){
       }
     );
 
-  questionsContainer
-    .appendChild(box);
+
+  questionsContainer.appendChild(box);
 
 }
 
@@ -1208,21 +1160,18 @@ function addQuestion(data = null){
 function renumberQuestions(){
 
   const boxes =
-    questionsContainer
-      .querySelectorAll(
-        ".question-box"
-      );
+    questionsContainer.querySelectorAll(
+      ".question-box"
+    );
 
-  boxes.forEach(
-    (box,index) => {
+  boxes.forEach((box,index) => {
 
-      box.querySelector(
-        ".question-header strong"
-      ).textContent =
-        `Question ${index + 1}`;
+    box.querySelector(
+      ".question-header strong"
+    ).textContent =
+      `Question ${index + 1}`;
 
-    }
-  );
+  });
 
 }
 
@@ -1230,10 +1179,9 @@ function renumberQuestions(){
 function collectQuestions(){
 
   const boxes =
-    questionsContainer
-      .querySelectorAll(
-        ".question-box"
-      );
+    questionsContainer.querySelectorAll(
+      ".question-box"
+    );
 
   const questions = [];
 
@@ -1284,28 +1232,25 @@ function collectQuestions(){
 }
 
 
+/* =========================
+   RESET FORM
+========================= */
+
 function resetQuizForm(){
 
-  editingQuizId =
-    null;
+  editingQuizId = null;
 
-  questionNumber =
-    0;
+  questionNumber = 0;
 
-  quizTitle.value =
-    "";
+  quizTitle.value = "";
 
-  quizSubject.value =
-    "";
+  quizSubject.value = "";
 
-  quizDescription.value =
-    "";
+  quizDescription.value = "";
 
-  quizDuration.value =
-    "30";
+  quizDuration.value = "30";
 
-  questionsContainer.innerHTML =
-    "";
+  questionsContainer.innerHTML = "";
 
   formTitle.textContent =
     "Create New Quiz";
@@ -1320,6 +1265,10 @@ function resetQuizForm(){
 }
 
 
+/* =========================
+   NEW QUIZ
+========================= */
+
 newQuizButton.addEventListener(
   "click",
   () => {
@@ -1333,10 +1282,8 @@ newQuizButton.addEventListener(
     addQuestion();
 
     window.scrollTo({
-      top:
-        quizFormSection.offsetTop - 100,
-      behavior:
-        "smooth"
+      top:quizFormSection.offsetTop - 100,
+      behavior:"smooth"
     });
 
   }
@@ -1346,9 +1293,7 @@ newQuizButton.addEventListener(
 addQuestionButton.addEventListener(
   "click",
   () => {
-
     addQuestion();
-
   }
 );
 
@@ -1356,12 +1301,14 @@ addQuestionButton.addEventListener(
 cancelQuizButton.addEventListener(
   "click",
   () => {
-
     resetQuizForm();
-
   }
 );
 
+
+/* =========================
+   SAVE QUIZ
+========================= */
 
 saveQuizButton.addEventListener(
   "click",
@@ -1382,6 +1329,7 @@ saveQuizButton.addEventListener(
     const questions =
       collectQuestions();
 
+
     if(!title){
 
       showMessage(
@@ -1391,6 +1339,7 @@ saveQuizButton.addEventListener(
       return;
 
     }
+
 
     if(!subject){
 
@@ -1402,15 +1351,6 @@ saveQuizButton.addEventListener(
 
     }
 
-    if(durationMinutes <= 0){
-
-      showMessage(
-        "Please set a quiz time."
-      );
-
-      return;
-
-    }
 
     if(questions.length === 0){
 
@@ -1422,9 +1362,8 @@ saveQuizButton.addEventListener(
 
     }
 
-    for(
-      const question of questions
-    ){
+
+    for(const question of questions){
 
       if(
         !question.question ||
@@ -1443,24 +1382,21 @@ saveQuizButton.addEventListener(
 
     }
 
-    saveQuizButton.disabled =
-      true;
+
+    saveQuizButton.disabled = true;
 
     saveQuizButton.textContent =
       "Saving...";
+
 
     try{
 
       const quizData = {
 
         title,
-
         subject,
-
         description,
-
         questions,
-
         durationMinutes,
 
         updatedAt:
@@ -1470,6 +1406,7 @@ saveQuizButton.addEventListener(
           auth.currentUser.uid
 
       };
+
 
       if(editingQuizId){
 
@@ -1491,10 +1428,7 @@ saveQuizButton.addEventListener(
 
         const newRef =
           doc(
-            collection(
-              db,
-              "quizzes"
-            )
+            collection(db,"quizzes")
           );
 
         await setDoc(
@@ -1503,8 +1437,7 @@ saveQuizButton.addEventListener(
 
             ...quizData,
 
-            published:
-              false,
+            published:false,
 
             createdAt:
               new Date().toISOString(),
@@ -1521,6 +1454,7 @@ saveQuizButton.addEventListener(
 
       }
 
+
       resetQuizForm();
 
       await loadQuizzes();
@@ -1536,8 +1470,8 @@ saveQuizButton.addEventListener(
 
     }
 
-    saveQuizButton.disabled =
-      false;
+
+    saveQuizButton.disabled = false;
 
     saveQuizButton.textContent =
       "Save Quiz";
@@ -1545,6 +1479,10 @@ saveQuizButton.addEventListener(
   }
 );
 
+
+/* =========================
+   LOAD QUIZZES
+========================= */
 
 async function loadQuizzes(){
 
@@ -1555,11 +1493,9 @@ async function loadQuizzes(){
 
     const snapshot =
       await getDocs(
-        collection(
-          db,
-          "quizzes"
-        )
+        collection(db,"quizzes")
       );
+
 
     if(snapshot.empty){
 
@@ -1570,8 +1506,9 @@ async function loadQuizzes(){
 
     }
 
-    quizList.innerHTML =
-      "";
+
+    quizList.innerHTML = "";
+
 
     snapshot.forEach(item => {
 
@@ -1583,6 +1520,7 @@ async function loadQuizzes(){
           quiz.durationMinutes
         ) || 30;
 
+
       const hours =
         Math.floor(
           totalMinutes / 60
@@ -1591,13 +1529,13 @@ async function loadQuizzes(){
       const minutes =
         totalMinutes % 60;
 
+
       const div =
-        document.createElement(
-          "div"
-        );
+        document.createElement("div");
 
       div.className =
         "quiz-item";
+
 
       div.innerHTML = `
 
@@ -1621,15 +1559,11 @@ async function loadQuizzes(){
 
             • ⏱️
 
-            ${String(hours).padStart(
-              2,
-              "0"
-            )}:${String(minutes).padStart(
-              2,
-              "0"
-            )}:00
+            ${String(hours).padStart(2,"0")}:
+            ${String(minutes).padStart(2,"0")}:00
 
           </p>
+
 
           <span
             class="badge ${
@@ -1648,6 +1582,7 @@ async function loadQuizzes(){
 
         </div>
 
+
         <div class="actions">
 
           <button
@@ -1655,6 +1590,7 @@ async function loadQuizzes(){
             data-edit="${item.id}">
             Edit
           </button>
+
 
           <button
             class="${
@@ -1672,6 +1608,7 @@ async function loadQuizzes(){
 
           </button>
 
+
           <button
             class="share"
             data-share="${item.id}">
@@ -1679,6 +1616,7 @@ async function loadQuizzes(){
             🔗 Share
 
           </button>
+
 
           <button
             class="delete"
@@ -1692,15 +1630,16 @@ async function loadQuizzes(){
 
       `;
 
+
       quizList.appendChild(div);
 
     });
 
 
+    /* EDIT */
+
     quizList
-      .querySelectorAll(
-        "[data-edit]"
-      )
+      .querySelectorAll("[data-edit]")
       .forEach(button => {
 
         button.addEventListener(
@@ -1717,10 +1656,10 @@ async function loadQuizzes(){
       });
 
 
+    /* PUBLISH */
+
     quizList
-      .querySelectorAll(
-        "[data-publish]"
-      )
+      .querySelectorAll("[data-publish]")
       .forEach(button => {
 
         button.addEventListener(
@@ -1737,10 +1676,10 @@ async function loadQuizzes(){
       });
 
 
+    /* DELETE */
+
     quizList
-      .querySelectorAll(
-        "[data-delete]"
-      )
+      .querySelectorAll("[data-delete]")
       .forEach(button => {
 
         button.addEventListener(
@@ -1757,10 +1696,10 @@ async function loadQuizzes(){
       });
 
 
+    /* SHARE */
+
     quizList
-      .querySelectorAll(
-        "[data-share]"
-      )
+      .querySelectorAll("[data-share]")
       .forEach(button => {
 
         button.addEventListener(
@@ -1770,20 +1709,28 @@ async function loadQuizzes(){
             const quizId =
               button.dataset.share;
 
-            const basePath =
-  window.location.pathname.substring(
-    0,
-    window.location.pathname.lastIndexOf("/") + 1
-  );
 
-const quizUrl =
-  `${window.location.origin}${basePath}quiz.html?id=${quizId}`;
+            /*
+              IMPORTANT:
+
+              This is your GitHub Pages website.
+              The old code generated the link from
+              the current page and could create a
+              wrong GitHub / blob URL.
+
+              Now the quiz link is always generated
+              directly from the GitHub Pages site.
+            */
+
+            const quizUrl =
+              `https://kousikghosh93.github.io/WEBNEST/quiz.html?id=${encodeURIComponent(quizId)}`;
+
+
             try{
 
-              await navigator.clipboard
-                .writeText(
-                  quizUrl
-                );
+              await navigator.clipboard.writeText(
+                quizUrl
+              );
 
               showMessage(
                 "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
@@ -1819,6 +1766,10 @@ const quizUrl =
 }
 
 
+/* =========================
+   EDIT QUIZ
+========================= */
+
 async function editQuiz(id){
 
   try{
@@ -1832,6 +1783,7 @@ async function editQuiz(id){
         )
       );
 
+
     if(!snapshot.exists()){
 
       showMessage(
@@ -1842,11 +1794,12 @@ async function editQuiz(id){
 
     }
 
+
     const quiz =
       snapshot.data();
 
-    editingQuizId =
-      id;
+
+    editingQuizId = id;
 
     quizTitle.value =
       quiz.title || "";
@@ -1857,24 +1810,26 @@ async function editQuiz(id){
     quizDescription.value =
       quiz.description || "";
 
+
     const totalMinutes =
       Number(
         quiz.durationMinutes
       ) || 30;
 
-    const availableDurations =
-      [
-        15,
-        30,
-        45,
-        60,
-        75,
-        90,
-        105,
-        120,
-        150,
-        180
-      ];
+
+    const availableDurations = [
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      150,
+      180
+    ];
+
 
     if(
       availableDurations.includes(
@@ -1891,17 +1846,13 @@ async function editQuiz(id){
       quizDuration.value =
         "30";
 
-      showMessage(
-        "This quiz has a custom time. Please select a new time from the list."
-      );
-
     }
 
-    questionsContainer.innerHTML =
-      "";
 
-    questionNumber =
-      0;
+    questionsContainer.innerHTML = "";
+
+    questionNumber = 0;
+
 
     (quiz.questions || [])
       .forEach(question => {
@@ -1909,6 +1860,7 @@ async function editQuiz(id){
         addQuestion(question);
 
       });
+
 
     if(
       !quiz.questions ||
@@ -1919,24 +1871,22 @@ async function editQuiz(id){
 
     }
 
+
     formTitle.textContent =
       "Edit Quiz";
 
     saveQuizButton.textContent =
       "Update Quiz";
 
+
     quizFormSection
       .classList
       .add("active");
 
+
     window.scrollTo({
-
-      top:
-        quizFormSection.offsetTop - 100,
-
-      behavior:
-        "smooth"
-
+      top:quizFormSection.offsetTop - 100,
+      behavior:"smooth"
     });
 
   }
@@ -1953,6 +1903,10 @@ async function editQuiz(id){
 }
 
 
+/* =========================
+   PUBLISH / UNPUBLISH
+========================= */
+
 async function togglePublish(id){
 
   try{
@@ -1964,14 +1918,18 @@ async function togglePublish(id){
         id
       );
 
+
     const snapshot =
       await getDoc(quizRef);
+
 
     if(!snapshot.exists())
       return;
 
+
     const quiz =
       snapshot.data();
+
 
     await updateDoc(
       quizRef,
@@ -1989,11 +1947,13 @@ async function togglePublish(id){
       }
     );
 
+
     showMessage(
       quiz.published
         ? "Quiz unpublished."
         : "Quiz published."
     );
+
 
     await loadQuizzes();
 
@@ -2011,6 +1971,10 @@ async function togglePublish(id){
 }
 
 
+/* =========================
+   DELETE
+========================= */
+
 async function deleteQuiz(id){
 
   const confirmed =
@@ -2018,8 +1982,10 @@ async function deleteQuiz(id){
       "Are you sure you want to delete this quiz?"
     );
 
+
   if(!confirmed)
     return;
+
 
   try{
 
@@ -2031,9 +1997,11 @@ async function deleteQuiz(id){
       )
     );
 
+
     showMessage(
       "Quiz deleted."
     );
+
 
     await loadQuizzes();
 
@@ -2051,6 +2019,10 @@ async function deleteQuiz(id){
 }
 
 
+/* =========================
+   SCORES
+========================= */
+
 async function loadScores(){
 
   scoresMessage.textContent =
@@ -2062,8 +2034,8 @@ async function loadScores(){
   scoresTableWrapper.style.display =
     "none";
 
-  scoresBody.innerHTML =
-    "";
+  scoresBody.innerHTML = "";
+
 
   try{
 
@@ -2075,6 +2047,7 @@ async function loadScores(){
         )
       );
 
+
     if(snapshot.empty){
 
       scoresMessage.textContent =
@@ -2084,7 +2057,9 @@ async function loadScores(){
 
     }
 
+
     const scores = [];
+
 
     snapshot.forEach(item => {
 
@@ -2094,6 +2069,7 @@ async function loadScores(){
       });
 
     });
+
 
     scores.sort(
       (a,b) => {
@@ -2113,15 +2089,15 @@ async function loadScores(){
       }
     );
 
+
     scores.forEach(score => {
 
       const row =
-        document.createElement(
-          "tr"
-        );
+        document.createElement("tr");
 
-      let submitted =
-        "-";
+
+      let submitted = "-";
+
 
       if(score.submittedAt){
 
@@ -2129,6 +2105,7 @@ async function loadScores(){
           new Date(
             score.submittedAt
           );
+
 
         if(
           !Number.isNaN(
@@ -2143,19 +2120,18 @@ async function loadScores(){
 
       }
 
+
       row.innerHTML = `
 
         <td>
           ${escapeHtml(
-            score.studentName ||
-            "Unknown"
+            score.studentName || "Unknown"
           )}
         </td>
 
         <td>
           ${escapeHtml(
-            score.quizTitle ||
-            "Unknown Quiz"
+            score.quizTitle || "Unknown Quiz"
           )}
         </td>
 
@@ -2169,8 +2145,7 @@ async function loadScores(){
           )}
         </td>
 
-        <td
-          class="score-percentage">
+        <td class="score-percentage">
 
           ${Number(
             score.percentage || 0
@@ -2186,9 +2161,11 @@ async function loadScores(){
 
       `;
 
+
       scoresBody.appendChild(row);
 
     });
+
 
     scoresMessage.style.display =
       "none";
@@ -2204,6 +2181,7 @@ async function loadScores(){
       error
     );
 
+
     scoresMessage.textContent =
       "Could not load scores. Check Firestore Rules.";
 
@@ -2211,6 +2189,10 @@ async function loadScores(){
 
 }
 
+
+/* =========================
+   LOGIN / ACCESS
+========================= */
 
 onAuthStateChanged(
   auth,
@@ -2225,14 +2207,18 @@ onAuthStateChanged(
 
     }
 
+
     userEmail.textContent =
       user.email || "";
+
 
     const allowed =
       await checkAccess(user);
 
+
     if(!allowed)
       return;
+
 
     await loadRequests();
 
@@ -2243,6 +2229,10 @@ onAuthStateChanged(
   }
 );
 
+
+/* =========================
+   LOGOUT
+========================= */
 
 logoutButton.addEventListener(
   "click",
