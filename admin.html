@@ -1770,11 +1770,14 @@ async function loadQuizzes(){
             const quizId =
               button.dataset.share;
 
-            const quizUrl =
-  `${window.location.origin}${window.location.pathname
-    .substring(0, window.location.pathname.lastIndexOf("/") + 1)
-  }quiz.html?id=${quizId}`;
+            const basePath =
+  window.location.pathname.substring(
+    0,
+    window.location.pathname.lastIndexOf("/") + 1
+  );
 
+const quizUrl =
+  `${window.location.origin}${basePath}quiz.html?id=${quizId}`;
             try{
 
               await navigator.clipboard
