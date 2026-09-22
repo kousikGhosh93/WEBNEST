@@ -26,6 +26,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .logo {
@@ -65,28 +68,43 @@
       margin-bottom: 20px;
     }
 
+    .quiz-info {
+      color: #64748b;
+      margin-bottom: 25px;
+      padding: 14px;
+      background: #f8fafc;
+      border-radius: 10px;
+    }
+
     label {
       display: block;
       font-weight: 700;
       margin-bottom: 8px;
     }
 
-    input {
+    .name-input {
       width: 100%;
       padding: 13px;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
       font-size: 16px;
-      margin-bottom: 10px;
+      margin-bottom: 25px;
       outline: none;
     }
 
-    input:focus {
+    .name-input:focus {
       border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
     .question {
       margin-bottom: 28px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .question:last-of-type {
+      border-bottom: none;
     }
 
     .question h3 {
@@ -102,6 +120,7 @@
       margin-bottom: 10px;
       cursor: pointer;
       transition: 0.2s;
+      font-weight: 500;
     }
 
     .option:hover {
@@ -110,9 +129,13 @@
     }
 
     .option input {
-      width: auto;
       margin-right: 8px;
-      margin-bottom: 0;
+      cursor: pointer;
+    }
+
+    .option.selected {
+      background: #eff6ff;
+      border-color: #2563eb;
     }
 
     .submit-button {
@@ -125,10 +148,16 @@
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
+      margin-top: 10px;
     }
 
     .submit-button:hover {
       background: #1d4ed8;
+    }
+
+    .submit-button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
     }
 
     .result {
@@ -136,11 +165,45 @@
       text-align: center;
     }
 
+    .result-icon {
+      font-size: 55px;
+      margin-bottom: 10px;
+    }
+
     .score {
-      font-size: 48px;
+      font-size: 52px;
       font-weight: 800;
       color: #2563eb;
       margin: 15px 0;
+    }
+
+    .percentage {
+      display: inline-block;
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .result-message {
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .result-buttons {
+      margin-top: 25px;
+    }
+
+    .home-button {
+      display: inline-block;
+      text-decoration: none;
+      background: #2563eb;
+      color: white;
+      padding: 13px 22px;
+      border-radius: 10px;
+      font-weight: 700;
     }
 
     .loading,
@@ -154,13 +217,17 @@
       color: #b91c1c;
     }
 
-    .quiz-info {
-      color: #64748b;
-      margin-bottom: 25px;
+    .warning {
+      display: none;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 600;
     }
 
     @media (max-width: 600px) {
-
       header {
         padding: 16px 20px;
       }
@@ -177,6 +244,9 @@
         font-size: 27px;
       }
 
+      .logo {
+        font-size: 21px;
+      }
     }
   </style>
 </head>
@@ -189,9 +259,7 @@
       WebNest
     </div>
 
-    <a
-      href="index.html"
-      class="home-link">
+    <a href="index.html" class="home-link">
       ← Home
     </a>
 
@@ -200,9 +268,7 @@
 
   <main>
 
-    <div
-      id="quizArea"
-      class="card">
+    <div id="quizArea" class="card">
 
       <div class="loading">
         Loading quiz...
@@ -211,29 +277,33 @@
     </div>
 
 
-    <div
-      id="resultArea"
-      class="card result">
+    <div id="resultArea" class="card result">
 
-      <h1>🎉 Quiz Completed!</h1>
+      <div class="result-icon">
+        🎉
+      </div>
 
-      <p>
-        Your score is
+      <h1>
+        Quiz Completed!
+      </h1>
+
+      <p style="margin-top:10px;">
+        Your Score
       </p>
 
-      <div
-        id="score"
-        class="score">
+      <div id="score" class="score">
         0 / 0
       </div>
 
-      <p id="scoreMessage"></p>
+      <div id="percentage" class="percentage">
+        0%
+      </div>
 
-      <div style="margin-top:25px;">
+      <p id="scoreMessage" class="result-message"></p>
 
-        <a
-          href="index.html"
-          class="home-link">
+      <div class="result-buttons">
+
+        <a href="index.html" class="home-button">
           ← Back to Home
         </a>
 
@@ -266,6 +336,9 @@
     const scoreElement =
       document.getElementById("score");
 
+    const percentageElement =
+      document.getElementById("percentage");
+
     const scoreMessage =
       document.getElementById("scoreMessage");
 
@@ -275,9 +348,11 @@
         window.location.search
       );
 
-
     const quizId =
       params.get("id");
+
+
+    let alreadySubmitted = false;
 
 
     function escapeHtml(value) {
@@ -303,7 +378,6 @@
         `;
 
         return;
-
       }
 
 
@@ -341,7 +415,6 @@
           `;
 
           return;
-
         }
 
 
@@ -354,7 +427,6 @@
           `;
 
           return;
-
         }
 
 
@@ -384,6 +456,18 @@
         quiz.questions || [];
 
 
+      if (questions.length === 0) {
+
+        quizArea.innerHTML = `
+          <div class="error">
+            This quiz has no questions.
+          </div>
+        `;
+
+        return;
+      }
+
+
       let html = `
 
         <h1>
@@ -401,7 +485,9 @@
 
           Subject:
           <strong>
-            ${escapeHtml(quiz.subject || "General")}
+            ${escapeHtml(
+              quiz.subject || "General"
+            )}
           </strong>
 
           &nbsp; | &nbsp;
@@ -423,9 +509,16 @@
           <input
             type="text"
             id="studentName"
+            class="name-input"
             placeholder="Enter your name"
+            maxlength="50"
             required
           >
+
+          <div
+            id="warning"
+            class="warning">
+          </div>
 
       `;
 
@@ -438,7 +531,9 @@
 
             <h3>
               ${index + 1}.
-              ${escapeHtml(question.question)}
+              ${escapeHtml(
+                question.question
+              )}
             </h3>
 
         `;
@@ -448,32 +543,36 @@
           question.options || [];
 
 
-        options.forEach((option, optionIndex) => {
+        options.forEach(
+          (option, optionIndex) => {
 
-          const letter =
-            String.fromCharCode(
-              65 + optionIndex
-            );
+            const letter =
+              String.fromCharCode(
+                65 + optionIndex
+              );
 
 
-          html += `
+            html += `
 
-            <label class="option">
+              <label
+                class="option"
+                data-question="${index}">
 
-              <input
-                type="radio"
-                name="question-${index}"
-                value="${optionIndex}"
-              >
+                <input
+                  type="radio"
+                  name="question-${index}"
+                  value="${optionIndex}"
+                >
 
-              ${letter}. 
-              ${escapeHtml(option)}
+                ${letter}.
+                ${escapeHtml(option)}
 
-            </label>
+              </label>
 
-          `;
+            `;
 
-        });
+          }
+        );
 
 
         html += `
@@ -489,7 +588,8 @@
 
           <button
             type="submit"
-            class="submit-button">
+            class="submit-button"
+            id="submitButton">
 
             Submit Quiz
 
@@ -501,6 +601,40 @@
 
 
       quizArea.innerHTML = html;
+
+
+      document
+        .querySelectorAll(".option")
+        .forEach((option) => {
+
+          option.addEventListener(
+            "click",
+            () => {
+
+              const questionIndex =
+                option.dataset.question;
+
+              document
+                .querySelectorAll(
+                  `.option[data-question="${questionIndex}"]`
+                )
+                .forEach((item) => {
+
+                  item.classList.remove(
+                    "selected"
+                  );
+
+                });
+
+
+              option.classList.add(
+                "selected"
+              );
+
+            }
+          );
+
+        });
 
 
       document
@@ -521,6 +655,11 @@
 
     async function submitQuiz(quiz) {
 
+      if (alreadySubmitted) {
+        return;
+      }
+
+
       const studentName =
         document
           .getElementById("studentName")
@@ -535,12 +674,90 @@
         );
 
         return;
-
       }
 
 
       const questions =
         quiz.questions || [];
+
+
+      const unanswered = [];
+
+
+      questions.forEach(
+        (question, index) => {
+
+          const selected =
+            document.querySelector(
+              `input[name="question-${index}"]:checked`
+            );
+
+
+          if (!selected) {
+
+            unanswered.push(
+              index + 1
+            );
+
+          }
+
+        }
+      );
+
+
+      if (unanswered.length > 0) {
+
+        const warning =
+          document.getElementById(
+            "warning"
+          );
+
+
+        warning.textContent =
+          `Please answer question${
+            unanswered.length > 1 ? "s" : ""
+          }: ${unanswered.join(", ")}`;
+
+
+        warning.style.display =
+          "block";
+
+
+        document
+          .querySelector(
+            `.question:nth-of-type(${unanswered[0] + 1})`
+          )
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+
+        return;
+      }
+
+
+      const warning =
+        document.getElementById(
+          "warning"
+        );
+
+
+      warning.style.display =
+        "none";
+
+
+      const submitButton =
+        document.getElementById(
+          "submitButton"
+        );
+
+
+      submitButton.disabled =
+        true;
+
+      submitButton.textContent =
+        "Submitting...";
 
 
       let score = 0;
@@ -573,33 +790,12 @@
         questions.length;
 
 
-      scoreElement.textContent =
-        `${score} / ${total}`;
-
-
-      if (score === total) {
-
-        scoreMessage.textContent =
-          "Excellent! You got every question correct. 🎉";
-
-      } else if (score >= total / 2) {
-
-        scoreMessage.textContent =
-          "Good job! Keep practising. 👍";
-
-      } else {
-
-        scoreMessage.textContent =
-          "Keep practising and try again. 💪";
-
-      }
-
-
-      quizArea.style.display =
-        "none";
-
-      resultArea.style.display =
-        "block";
+      const percentage =
+        total > 0
+          ? Math.round(
+              (score / total) * 100
+            )
+          : 0;
 
 
       try {
@@ -608,7 +804,8 @@
           collection(db, "scores"),
           {
 
-            quizId: quiz.id,
+            quizId:
+              quiz.id,
 
             quizTitle:
               quiz.title || "",
@@ -619,12 +816,7 @@
 
             total,
 
-            percentage:
-              total > 0
-                ? Math.round(
-                    (score / total) * 100
-                  )
-                : 0,
+            percentage,
 
             submittedAt:
               new Date().toISOString()
@@ -632,11 +824,67 @@
           }
         );
 
+
+        alreadySubmitted =
+          true;
+
+
+        scoreElement.textContent =
+          `${score} / ${total}`;
+
+
+        percentageElement.textContent =
+          `${percentage}%`;
+
+
+        if (percentage === 100) {
+
+          scoreMessage.textContent =
+            "Excellent! You got every question correct. 🎉";
+
+        } else if (percentage >= 50) {
+
+          scoreMessage.textContent =
+            "Good job! Keep practising. 👍";
+
+        } else {
+
+          scoreMessage.textContent =
+            "Keep practising and try again. 💪";
+
+        }
+
+
+        quizArea.style.display =
+          "none";
+
+        resultArea.style.display =
+          "block";
+
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+
       } catch (error) {
 
         console.error(
           "Score save error:",
           error
+        );
+
+
+        submitButton.disabled =
+          false;
+
+        submitButton.textContent =
+          "Submit Quiz";
+
+
+        alert(
+          "Could not save your score. Please try again."
         );
 
       }
