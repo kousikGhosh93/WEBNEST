@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>WebNest</title>
 
   <style>
@@ -12,14 +13,7 @@
       padding: 0;
       font-family: Arial, sans-serif;
     }
-<script type="module">
-  import { auth, db } from "./firebase.js";
 
-  window.webnestFirebase = {
-    auth,
-    db
-  };
-</script>
     body {
       background: #f8fafc;
       color: #0f172a;
@@ -250,14 +244,20 @@
     <section id="contact">
       <h2 class="section-title">Contact WebNest</h2>
 
-      <div class="card" style="max-width:600px;margin:auto;text-align:center;">
+      <div
+        class="card"
+        style="max-width:600px;margin:auto;text-align:center;"
+      >
         <p>
           Interested in a website, quiz or digital project?
           Contact WebNest to discuss your idea.
         </p>
 
         <div class="buttons">
-          <a href="mailto:your-email@example.com" class="btn primary">
+          <a
+            href="mailto:your-email@example.com"
+            class="btn primary"
+          >
             Email Us
           </a>
         </div>
@@ -269,6 +269,16 @@
   <footer>
     © 2026 WebNest. All rights reserved.
   </footer>
+
+  <!-- Firebase connection -->
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+
+    window.webnestFirebase = {
+      auth,
+      db
+    };
+  </script>
 
 </body>
 </html>
