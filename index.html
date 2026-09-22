@@ -327,149 +327,176 @@
   </footer>
 
 
-  <script type="module">
+ <script type="module">
 
-    import {
-      collection,
-      getDocs,
-      query,
-      where
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import {
+    collection,
+    getDocs
+  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-    import {
-      db
-    } from "./firebase.js";
+  import {
+    db
+  } from "./firebase.js";
 
 
-    const quizContainer =
-      document.getElementById("quizContainer");
+  const quizContainer =
+    document.getElementById("quizContainer");
 
 
-    function escapeHtml(value) {
+  function escapeHtml(value) {
 
-      return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
 
-    }
-
-
-    async function loadPublishedQuizzes() {
-
-      try {
-
-        const quizzesQuery =
-          query(
-            collection(db, "quizzes"),
-            where("published", "==", true)
-          );
+  }
 
 
-        const snapshot =
-          await getDocs(quizzesQuery);
+  async function loadPublishedQuizzes() {
+
+    try {
+
+      quizContainer.innerHTML = `
+        <div class="loading">
+          Loading quizzes...
+        </div>
+      `;
 
 
-        if (snapshot.empty) {
+      const snapshot =
+        await getDocs(
+          collection(db, "quizzes")
+        );
 
-          quizContainer.innerHTML = `
-            <div class="empty">
-              No quizzes published yet.
-            </div>
-          `;
 
-          return;
+      const publishedQuizzes = [];
+
+
+      snapshot.forEach((doc) => {
+
+        const quiz = doc.data();
+
+
+        if (quiz.published === true) {
+
+          publishedQuizzes.push({
+            id: doc.id,
+            ...quiz
+          });
 
         }
 
-
-        quizContainer.innerHTML = "";
-
-
-        snapshot.forEach((item) => {
-
-          const quiz =
-            item.data();
+      });
 
 
-          const questionCount =
-            (quiz.questions || []).length;
-
-
-          const card =
-            document.createElement("div");
-
-          card.className = "card";
-
-
-          card.innerHTML = `
-
-            <h3>
-              ${escapeHtml(quiz.title)}
-            </h3>
-
-            <p>
-              ${escapeHtml(
-                quiz.description ||
-                "Interactive MCQ practice quiz."
-              )}
-            </p>
-
-            <div class="quiz-meta">
-              Subject:
-              ${escapeHtml(quiz.subject)}
-              <br>
-              Questions:
-              ${questionCount}
-            </div>
-
-            <div class="buttons">
-
-              <a
-                href="quiz.html?id=${encodeURIComponent(item.id)}"
-                class="btn primary">
-                Start Quiz
-              </a>
-
-            </div>
-
-          `;
-
-
-          quizContainer.appendChild(card);
-
-        });
-
-
-      } catch (error) {
-
-        console.error(error);
-
+      if (publishedQuizzes.length === 0) {
 
         quizContainer.innerHTML = `
-
           <div class="empty">
+            No quizzes published yet.
+          </div>
+        `;
 
-            Could not load quizzes.
+        return;
 
-            <br><br>
+      }
 
-            Please check Firebase settings.
+
+      quizContainer.innerHTML = "";
+
+
+      publishedQuizzes.forEach((quiz) => {
+
+        const questionCount =
+          Array.isArray(quiz.questions)
+            ? quiz.questions.length
+            : 0;
+
+
+        const card =
+          document.createElement("div");
+
+        card.className = "card";
+
+
+        card.innerHTML = `
+
+          <h3>
+            ${escapeHtml(quiz.title)}
+          </h3>
+
+          <p>
+            ${escapeHtml(
+              quiz.description ||
+              "Interactive MCQ practice quiz."
+            )}
+          </p>
+
+          <div class="quiz-meta">
+
+            Subject:
+            ${escapeHtml(quiz.subject || "General")}
+
+            <br>
+
+            Questions:
+            ${questionCount}
+
+          </div>
+
+          <div class="buttons">
+
+            <a
+              href="quiz.html?id=${encodeURIComponent(quiz.id)}"
+              class="btn primary">
+
+              Start Quiz
+
+            </a>
 
           </div>
 
         `;
 
-      }
+
+        quizContainer.appendChild(card);
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "Quiz loading error:",
+        error
+      );
+
+
+      quizContainer.innerHTML = `
+
+        <div class="empty">
+
+          Could not load quizzes.
+
+          <br><br>
+
+          ${escapeHtml(error.message)}
+
+        </div>
+
+      `;
 
     }
 
+  }
 
-    loadPublishedQuizzes();
 
-  </script>
+  loadPublishedQuizzes();
+
+</script>
 
 </body>
 </html>
