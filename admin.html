@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>WebNest - Admin Panel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 18px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: #2563eb;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-email {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 9px;
+      padding: 10px 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .logout {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    main {
+      width: min(1100px, 92%);
+      margin: 40px auto;
+    }
+
+    .welcome {
+      margin-bottom: 30px;
+    }
+
+    .welcome h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    .welcome p {
+      color: #64748b;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+    }
+
+    .card h2 {
+      margin-bottom: 8px;
+      font-size: 21px;
+    }
+
+    .card-description {
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .request {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .request-name {
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .request-email {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 14px;
+      word-break: break-word;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .approve {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .reject {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .empty {
+      color: #64748b;
+      padding: 15px 0;
+    }
+
+    .message {
+      margin-bottom: 20px;
+      padding: 12px 15px;
+      border-radius: 10px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      display: none;
+    }
+
+    .loading {
+      color: #64748b;
+    }
+
+    @media (max-width: 650px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      .user-email {
+        display: none;
+      }
+
+      .welcome h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+
+    <div class="logo">
+      WebNest
+    </div>
+
+    <div class="header-right">
+
+      <span
+        class="user-email"
+        id="userEmail"
+      ></span>
+
+      <button
+        class="logout"
+        id="logoutButton"
+      >
+        Logout
+      </button>
+
+    </div>
+
+  </header>
+
+  <main>
+
+    <div class="welcome">
+      <h1>Admin Panel</h1>
+
+      <p>
+        Manage WebNest from here.
+      </p>
+    </div>
+
+    <div
+      class="message"
+      id="message"
+    ></div>
+
+    <div class="grid">
+
+      <div class="card">
+
+        <h2>
+          👑 Admin Requests
+        </h2>
+
+        <p class="card-description">
+          Review people who want admin access.
+        </p>
+
+        <div id="requests">
+
+          <div class="loading">
+            Loading requests...
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2>
+          📚 Quiz Management
+        </h2>
+
+        <p class="card-description">
+          Quiz management will be added here.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <h2>
+          📊 Student Scores
+        </h2>
+
+        <p class="card-description">
+          Student results will be available here.
+        </p>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script type="module">
+
+    import {
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    import {
+      collection,
+      getDocs,
+      doc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    import {
+      auth,
+      db
+    } from "./firebase.js";
+
+
+    const requestsContainer =
+      document.getElementById("requests");
+
+    const message =
+      document.getElementById("message");
+
+    const userEmail =
+      document.getElementById("userEmail");
+
+    const logoutButton =
+      document.getElementById("logoutButton");
+
+
+    function showMessage(text) {
+
+      message.textContent = text;
+      message.style.display = "block";
+
+      setTimeout(() => {
+        message.style.display = "none";
+      }, 3000);
+
+    }
+
+
+    async function checkOwner(user) {
+
+      try {
+
+        const snapshot =
+          await getDocs(collection(db, "users"));
+
+        let currentUser = null;
+
+        snapshot.forEach((item) => {
+
+          if (item.id === user.uid) {
+            currentUser = item.data();
+          }
+
+        });
+
+        if (!currentUser) {
+
+          window.location.href = "index.html";
+          return null;
+
+        }
+
+        if (
+          currentUser.role !== "owner" &&
+          currentUser.role !== "admin"
+        ) {
+
+          window.location.href = "index.html";
+          return null;
+
+        }
+
+        return currentUser;
+
+      } catch (error) {
+
+        console.error(error);
+
+        window.location.href = "index.html";
+
+        return null;
+      }
+
+    }
+
+
+    async function loadRequests(currentUser) {
+
+      requestsContainer.innerHTML =
+        '<div class="loading">Loading requests...</div>';
+
+      if (currentUser.role !== "owner") {
+
+        requestsContainer.innerHTML =
+          '<div class="empty">Only the Owner can approve new admins.</div>';
+
+        return;
+
+      }
+
+
+      try {
+
+        const snapshot =
+          await getDocs(collection(db, "users"));
+
+        const pendingUsers = [];
+
+        snapshot.forEach((item) => {
+
+          const data = item.data();
+
+          if (data.role === "pending") {
+
+            pendingUsers.push({
+              id: item.id,
+              ...data
+            });
+
+          }
+
+        });
+
+
+        if (pendingUsers.length === 0) {
+
+          requestsContainer.innerHTML =
+            '<div class="empty">No pending requests.</div>';
+
+          return;
+
+        }
+
+
+        requestsContainer.innerHTML = "";
+
+
+        pendingUsers.forEach((person) => {
+
+          const request =
+            document.createElement("div");
+
+          request.className = "request";
+
+          request.innerHTML = `
+
+            <div class="request-name">
+              ${escapeHtml(person.name || "Unknown User")}
+            </div>
+
+            <div class="request-email">
+              ${escapeHtml(person.email || "")}
+            </div>
+
+            <div class="actions">
+
+              <button
+                class="approve"
+                data-id="${person.id}"
+              >
+                Approve
+              </button>
+
+              <button
+                class="reject"
+                data-id="${person.id}"
+              >
+                Reject
+              </button>
+
+            </div>
+          `;
+
+          requestsContainer.appendChild(request);
+
+        });
+
+
+        document
+          .querySelectorAll(".approve")
+          .forEach((button) => {
+
+            button.addEventListener(
+              "click",
+              () => changeRole(
+                button.dataset.id,
+                "admin"
+              )
+            );
+
+          });
+
+
+        document
+          .querySelectorAll(".reject")
+          .forEach((button) => {
+
+            button.addEventListener(
+              "click",
+              () => changeRole(
+                button.dataset.id,
+                "rejected"
+              )
+            );
+
+          });
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        requestsContainer.innerHTML =
+          '<div class="empty">Could not load requests.</div>';
+
+      }
+
+    }
+
+
+    async function changeRole(userId, role) {
+
+      try {
+
+        await updateDoc(
+          doc(db, "users", userId),
+          {
+            role: role
+          }
+        );
+
+        showMessage(
+          role === "admin"
+            ? "Admin approved successfully."
+            : "Request rejected."
+        );
+
+        const user =
+          auth.currentUser;
+
+        if (user) {
+
+          const currentUser =
+            await checkOwner(user);
+
+          if (currentUser) {
+            await loadRequests(currentUser);
+          }
+
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "Action failed. Please try again."
+        );
+
+      }
+
+    }
+
+
+    function escapeHtml(value) {
+
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+    onAuthStateChanged(
+      auth,
+      async (user) => {
+
+        if (!user) {
+
+          window.location.href =
+            "login.html";
+
+          return;
+
+        }
+
+
+        userEmail.textContent =
+          user.email || "";
+
+
+        const currentUser =
+          await checkOwner(user);
+
+
+        if (currentUser) {
+
+          await loadRequests(currentUser);
+
+        }
+
+      }
+    );
+
+
+    logoutButton.addEventListener(
+      "click",
+      async () => {
+
+        await signOut(auth);
+
+        window.location.href =
+          "login.html";
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
