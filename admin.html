@@ -121,6 +121,7 @@
     .quiz-list {
       display: grid;
       gap: 12px;
+      margin-top: 25px;
     }
 
     .quiz-item {
@@ -140,6 +141,7 @@
     .quiz-info p {
       color: #64748b;
       font-size: 14px;
+      line-height: 1.6;
     }
 
     .badge {
@@ -233,11 +235,6 @@
       background: white;
     }
 
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-
     input:focus,
     textarea:focus,
     select:focus {
@@ -245,11 +242,23 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
-    .time-help {
+    .timer-setting {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 22px;
+    }
+
+    .timer-setting label {
+      color: #1d4ed8;
+    }
+
+    .timer-help {
       color: #64748b;
       font-size: 13px;
       margin-top: -10px;
-      margin-bottom: 17px;
+      margin-bottom: 5px;
     }
 
     .question-box {
@@ -483,24 +492,30 @@
           placeholder="Short description of this quiz"
         ></textarea>
 
+
         <!-- TIMER SETTING -->
 
-        <label for="quizTimeLimit">
-          Time Limit (minutes)
-        </label>
+        <div class="timer-setting">
 
-        <input
-          id="quizTimeLimit"
-          type="number"
-          min="0"
-          step="1"
-          value="30"
-          placeholder="Example: 30"
-        >
+          <label for="quizTimer">
+            ⏱️ Quiz Timer
+          </label>
 
-        <p class="time-help">
-          Example: 30 = 30 minutes, 60 = 1 hour. 0 দিলে Timer বন্ধ থাকবে।
-        </p>
+          <input
+            id="quizTimer"
+            type="number"
+            min="1"
+            max="600"
+            value="30"
+            placeholder="Example: 30"
+          >
+
+          <div class="timer-help">
+            Enter the time in minutes. Example: 30 = 30 minutes, 45 = 45 minutes.
+          </div>
+
+        </div>
+
 
         <div id="questionsContainer"></div>
 
@@ -534,10 +549,7 @@
 
       <!-- QUIZ LIST -->
 
-      <div
-        style="margin-top:25px;"
-        id="quizList"
-      >
+      <div id="quizList">
         <div class="loading">
           Loading quizzes...
         </div>
@@ -644,8 +656,8 @@
   const quizDescription =
     document.getElementById("quizDescription");
 
-  const quizTimeLimit =
-    document.getElementById("quizTimeLimit");
+  const quizTimer =
+    document.getElementById("quizTimer");
 
   const questionsContainer =
     document.getElementById("questionsContainer");
@@ -673,9 +685,7 @@
 
 
   let currentUserData = null;
-
   let editingQuizId = null;
-
   let questionNumber = 0;
 
 
@@ -813,7 +823,6 @@
         box.className = "request";
 
         box.innerHTML = `
-
           <div class="request-name">
             ${escapeHtml(person.name || "Unknown User")}
           </div>
@@ -839,7 +848,6 @@
             </button>
 
           </div>
-
         `;
 
         requestsContainer.appendChild(box);
@@ -847,7 +855,7 @@
       });
 
 
-      document
+      requestsContainer
         .querySelectorAll("[data-user]")
         .forEach((button) => {
 
@@ -916,9 +924,6 @@
 
     box.className = "question-box";
 
-    box.dataset.questionId =
-      questionNumber;
-
     box.innerHTML = `
 
       <div class="question-header">
@@ -936,6 +941,7 @@
 
       </div>
 
+
       <label>
         Question
       </label>
@@ -945,10 +951,14 @@
         placeholder="Write the question here..."
       >${escapeHtml(data?.question || "")}</textarea>
 
+
       <div class="option-grid">
 
         <div>
-          <label>Option A</label>
+
+          <label>
+            Option A
+          </label>
 
           <input
             class="option-a"
@@ -956,10 +966,15 @@
             value="${escapeHtml(data?.options?.[0] || "")}"
             placeholder="Option A"
           >
+
         </div>
 
+
         <div>
-          <label>Option B</label>
+
+          <label>
+            Option B
+          </label>
 
           <input
             class="option-b"
@@ -967,10 +982,15 @@
             value="${escapeHtml(data?.options?.[1] || "")}"
             placeholder="Option B"
           >
+
         </div>
 
+
         <div>
-          <label>Option C</label>
+
+          <label>
+            Option C
+          </label>
 
           <input
             class="option-c"
@@ -978,10 +998,15 @@
             value="${escapeHtml(data?.options?.[2] || "")}"
             placeholder="Option C"
           >
+
         </div>
 
+
         <div>
-          <label>Option D</label>
+
+          <label>
+            Option D
+          </label>
 
           <input
             class="option-d"
@@ -989,9 +1014,11 @@
             value="${escapeHtml(data?.options?.[3] || "")}"
             placeholder="Option D"
           >
+
         </div>
 
       </div>
+
 
       <label>
         Correct Answer
@@ -1031,6 +1058,7 @@
 
     `;
 
+
     box
       .querySelector(".remove-question")
       .addEventListener(
@@ -1043,6 +1071,7 @@
 
         }
       );
+
 
     questionsContainer.appendChild(box);
 
@@ -1101,8 +1130,7 @@
 
       const correctAnswer =
         Number(
-          box.querySelector(".correct-answer")
-            .value
+          box.querySelector(".correct-answer").value
         );
 
       questions.push({
@@ -1121,16 +1149,12 @@
   function resetQuizForm() {
 
     editingQuizId = null;
-
     questionNumber = 0;
 
     quizTitle.value = "";
-
     quizSubject.value = "";
-
     quizDescription.value = "";
-
-    quizTimeLimit.value = "30";
+    quizTimer.value = "30";
 
     questionsContainer.innerHTML = "";
 
@@ -1152,16 +1176,12 @@
     () => {
 
       editingQuizId = null;
-
       questionNumber = 0;
 
       quizTitle.value = "";
-
       quizSubject.value = "";
-
       quizDescription.value = "";
-
-      quizTimeLimit.value = "30";
+      quizTimer.value = "30";
 
       questionsContainer.innerHTML = "";
 
@@ -1215,11 +1235,8 @@
       const description =
         quizDescription.value.trim();
 
-      const timeLimit =
-        Math.max(
-          0,
-          Number(quizTimeLimit.value) || 0
-        );
+      const timerMinutes =
+        Number(quizTimer.value);
 
       const questions =
         collectQuestions();
@@ -1241,6 +1258,23 @@
         showMessage(
           "Please enter the subject."
         );
+
+        return;
+
+      }
+
+
+      if (
+        !Number.isFinite(timerMinutes) ||
+        timerMinutes < 1 ||
+        timerMinutes > 600
+      ) {
+
+        showMessage(
+          "Timer must be between 1 and 600 minutes."
+        );
+
+        quizTimer.focus();
 
         return;
 
@@ -1286,6 +1320,23 @@
 
       try {
 
+        let publishedStatus = false;
+
+        if (editingQuizId) {
+
+          const oldQuiz =
+            await getDoc(
+              doc(db, "quizzes", editingQuizId)
+            );
+
+          if (oldQuiz.exists()) {
+            publishedStatus =
+              oldQuiz.data().published === true;
+          }
+
+        }
+
+
         const quizData = {
 
           title,
@@ -1294,11 +1345,14 @@
 
           description,
 
-          timeLimit,
-
           questions,
 
-          published: false,
+          timerMinutes,
+
+          published:
+            editingQuizId
+              ? publishedStatus
+              : false,
 
           updatedAt:
             new Date().toISOString(),
@@ -1407,16 +1461,14 @@
         const quiz =
           item.data();
 
+        const timerMinutes =
+          Number(quiz.timerMinutes || 30);
+
+
         const div =
           document.createElement("div");
 
         div.className = "quiz-item";
-
-
-        const timeText =
-          Number(quiz.timeLimit) > 0
-            ? `${Number(quiz.timeLimit)} min`
-            : "Timer Off";
 
 
         div.innerHTML = `
@@ -1424,16 +1476,16 @@
           <div class="quiz-info">
 
             <h3>
-              ${escapeHtml(quiz.title)}
+              ${escapeHtml(quiz.title || "Untitled Quiz")}
             </h3>
 
             <p>
-              ${escapeHtml(quiz.subject)}
+              ${escapeHtml(quiz.subject || "")}
               •
               ${(quiz.questions || []).length}
               question(s)
               •
-              ⏱️ ${timeText}
+              ⏱️ ${timerMinutes} minute(s)
             </p>
 
             <span
@@ -1462,7 +1514,6 @@
               Edit
             </button>
 
-
             <button
               class="${
                 quiz.published
@@ -1478,14 +1529,12 @@
               }
             </button>
 
-
             <button
               class="share"
               data-share="${item.id}"
             >
               🔗 Share
             </button>
-
 
             <button
               class="delete"
@@ -1504,22 +1553,23 @@
       });
 
 
-      document
+      quizList
         .querySelectorAll("[data-edit]")
         .forEach((button) => {
 
           button.addEventListener(
             "click",
-            () =>
+            () => {
               editQuiz(
                 button.dataset.edit
-              )
+              );
+            }
           );
 
         });
 
 
-      document
+      quizList
         .querySelectorAll("[data-share]")
         .forEach((button) => {
 
@@ -1533,15 +1583,30 @@
               const quizUrl =
                 `${window.location.origin}/quiz.html?id=${quizId}`;
 
+
               try {
 
-                await navigator.clipboard.writeText(
-                  quizUrl
-                );
+                if (
+                  navigator.clipboard &&
+                  window.isSecureContext
+                ) {
 
-                showMessage(
-                  "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
-                );
+                  await navigator.clipboard.writeText(
+                    quizUrl
+                  );
+
+                  showMessage(
+                    "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
+                  );
+
+                } else {
+
+                  prompt(
+                    "Copy this quiz link:",
+                    quizUrl
+                  );
+
+                }
 
               } catch (error) {
 
@@ -1560,31 +1625,33 @@
         });
 
 
-      document
+      quizList
         .querySelectorAll("[data-publish]")
         .forEach((button) => {
 
           button.addEventListener(
             "click",
-            () =>
+            () => {
               togglePublish(
                 button.dataset.publish
-              )
+              );
+            }
           );
 
         });
 
 
-      document
+      quizList
         .querySelectorAll("[data-delete]")
         .forEach((button) => {
 
           button.addEventListener(
             "click",
-            () =>
+            () => {
               deleteQuiz(
                 button.dataset.delete
-              )
+              );
+            }
           );
 
         });
@@ -1668,6 +1735,7 @@
 
         const row =
           document.createElement("tr");
+
 
         let submitted =
           "-";
@@ -1787,8 +1855,8 @@
       quizDescription.value =
         quiz.description || "";
 
-      quizTimeLimit.value =
-        quiz.timeLimit ?? 30;
+      quizTimer.value =
+        Number(quiz.timerMinutes || 30);
 
 
       questionsContainer.innerHTML = "";
