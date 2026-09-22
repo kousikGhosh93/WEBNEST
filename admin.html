@@ -380,7 +380,9 @@
 <body>
 
 <header>
-  <div class="logo">WebNest</div>
+  <div class="logo">
+    WebNest
+  </div>
 
   <div class="header-right">
     <span class="user-email" id="userEmail"></span>
@@ -702,6 +704,7 @@
 
     }
 
+
     if (
       data.role !== "owner" &&
       data.role !== "admin"
@@ -761,6 +764,7 @@
 
       });
 
+
       if (pending.length === 0) {
 
         requestsContainer.innerHTML =
@@ -770,7 +774,9 @@
 
       }
 
+
       requestsContainer.innerHTML = "";
+
 
       pending.forEach((person) => {
 
@@ -912,7 +918,10 @@
       <div class="option-grid">
 
         <div>
-          <label>Option A</label>
+
+          <label>
+            Option A
+          </label>
 
           <input
             class="option-a"
@@ -920,10 +929,14 @@
             value="${escapeHtml(data?.options?.[0] || "")}"
             placeholder="Option A"
           >
+
         </div>
 
         <div>
-          <label>Option B</label>
+
+          <label>
+            Option B
+          </label>
 
           <input
             class="option-b"
@@ -931,10 +944,14 @@
             value="${escapeHtml(data?.options?.[1] || "")}"
             placeholder="Option B"
           >
+
         </div>
 
         <div>
-          <label>Option C</label>
+
+          <label>
+            Option C
+          </label>
 
           <input
             class="option-c"
@@ -942,10 +959,14 @@
             value="${escapeHtml(data?.options?.[2] || "")}"
             placeholder="Option C"
           >
+
         </div>
 
         <div>
-          <label>Option D</label>
+
+          <label>
+            Option D
+          </label>
 
           <input
             class="option-d"
@@ -953,6 +974,7 @@
             value="${escapeHtml(data?.options?.[3] || "")}"
             placeholder="Option D"
           >
+
         </div>
 
       </div>
@@ -1003,6 +1025,7 @@
         () => {
 
           box.remove();
+
           renumberQuestions();
 
         }
@@ -1241,7 +1264,11 @@
           subject,
           description,
           questions,
-          published: false,
+
+          published:
+            editingQuizId
+              ? undefined
+              : false,
 
           updatedAt:
             new Date().toISOString(),
@@ -1253,6 +1280,8 @@
 
 
         if (editingQuizId) {
+
+          delete quizData.published;
 
           await updateDoc(
             doc(
@@ -1298,7 +1327,6 @@
 
         await loadQuizzes();
 
-
       } catch (error) {
 
         console.error(error);
@@ -1313,7 +1341,9 @@
       saveQuizButton.disabled = false;
 
       saveQuizButton.textContent =
-        "Save Quiz";
+        editingQuizId
+          ? "Update Quiz"
+          : "Save Quiz";
 
     }
   );
@@ -1397,7 +1427,6 @@
               Edit
             </button>
 
-
             <button
               class="${
                 quiz.published
@@ -1413,14 +1442,12 @@
               }
             </button>
 
-
             <button
               class="share"
               data-share="${item.id}"
             >
               🔗 Share
             </button>
-
 
             <button
               class="delete"
@@ -1445,20 +1472,19 @@
 
           button.addEventListener(
             "click",
-            () => {
+            () =>
               editQuiz(
                 button.dataset.edit
-              );
-            }
+              )
           );
 
         });
 
 
       /*
+        ============================
         SHARE BUTTON
-        quiz.html এবং admin.html একই WEBNEST folder-এ
-        থাকলে এই URL automatically সঠিক হবে।
+        ============================
       */
 
       quizList
@@ -1473,44 +1499,103 @@
                 button.dataset.share;
 
 
+              /*
+                This automatically creates:
+
+                https://your-site.github.io/WEBNEST/quiz.html?id=XXXX
+              */
+
               const quizUrl =
                 new URL(
-                  "quiz.html",
+                  "quiz.html?id=" + encodeURIComponent(quizId),
                   window.location.href
-                );
-
-
-              quizUrl.searchParams.set(
-                "id",
-                quizId
-              );
-
-
-              const finalUrl =
-                quizUrl.href;
+                ).href;
 
 
               try {
 
-                await navigator.clipboard.writeText(
-                  finalUrl
+                if (
+                  navigator.share &&
+                  /Android|iPhone|iPad|iPod/i.test(
+                    navigator.userAgent
+                  )
+                ) {
+
+                  await navigator.share({
+                    title: "WebNest Quiz",
+                    text: "Take this quiz",
+                    url: quizUrl
+                  });
+
+                  return;
+
+                }
+
+
+                if (
+                  navigator.clipboard &&
+                  window.isSecureContext
+                ) {
+
+                  await navigator.clipboard.writeText(
+                    quizUrl
+                  );
+
+                  showMessage(
+                    "✅ Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
+                  );
+
+                  return;
+
+                }
+
+
+                const textArea =
+                  document.createElement("textarea");
+
+                textArea.value =
+                  quizUrl;
+
+                textArea.style.position =
+                  "fixed";
+
+                textArea.style.left =
+                  "-9999px";
+
+                document.body.appendChild(
+                  textArea
                 );
 
-                showMessage(
-                  "Quiz link copied! এখন বন্ধুদের পাঠাতে পারো।"
+                textArea.focus();
+                textArea.select();
+
+                document.execCommand(
+                  "copy"
                 );
+
+                textArea.remove();
+
+                showMessage(
+                  "✅ Quiz link copied!"
+                );
+
 
               } catch (error) {
 
                 console.error(
-                  "Clipboard error:",
+                  "Share error:",
                   error
                 );
 
 
+                /*
+                  Last fallback:
+                  Show the link in a popup.
+                */
+
                 window.prompt(
-                  "এই link-টি copy করো:",
-                  finalUrl
+                  "এই Quiz link-টি copy করো:",
+                  quizUrl
                 );
 
               }
@@ -1527,11 +1612,10 @@
 
           button.addEventListener(
             "click",
-            () => {
+            () =>
               togglePublish(
                 button.dataset.publish
-              );
-            }
+              )
           );
 
         });
@@ -1543,11 +1627,10 @@
 
           button.addEventListener(
             "click",
-            () => {
+            () =>
               deleteQuiz(
                 button.dataset.delete
-              );
-            }
+              )
           );
 
         });
@@ -1632,7 +1715,6 @@
         const row =
           document.createElement("tr");
 
-
         let submitted =
           "-";
 
@@ -1643,7 +1725,6 @@
             new Date(
               score.submittedAt
             );
-
 
           if (!Number.isNaN(date.getTime())) {
 
@@ -1704,7 +1785,6 @@
         "Score loading error:",
         error
       );
-
 
       scoresMessage.textContent =
         "Could not load scores. Check Firestore Rules.";
@@ -1827,6 +1907,7 @@
       await updateDoc(
         doc(db, "quizzes", id),
         {
+
           published:
             !quiz.published,
 
@@ -1835,6 +1916,7 @@
 
           updatedBy:
             auth.currentUser.uid
+
         }
       );
 
@@ -1944,10 +2026,16 @@
     "click",
     async () => {
 
-      await signOut(auth);
+      try {
 
-      window.location.href =
-        "login.html";
+        await signOut(auth);
+
+      } finally {
+
+        window.location.href =
+          "login.html";
+
+      }
 
     }
   );
